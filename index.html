@@ -306,13 +306,19 @@ function renderAdminCats(){
   });
 
   cont.querySelectorAll('.btn-del-cat').forEach(b => b.onclick = () => {
+    cont.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
     adminCfg.categorias.splice(+b.dataset.ci, 1);
     renderAdminCats();
   });
-  cont.querySelectorAll('.cat-nombre').forEach(inp => inp.oninput = () => {
-    adminCfg.categorias[+inp.dataset.ci].label = inp.value;
+  cont.querySelectorAll('.cat-nombre').forEach(inp => {
+    // sync on every keystroke
+    inp.oninput = () => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; };
+    // also sync on blur in case oninput was missed
+    inp.onblur  = () => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; };
   });
   cont.querySelectorAll('.btn-add').forEach(b => b.onclick = () => {
+    // snapshot current labels before re-render
+    cont.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
     adminCfg.categorias[+b.dataset.ci].productos.push({id:uid(),emoji:'🎁',nombre:'',precio:0});
     renderAdminCats();
   });
@@ -342,6 +348,8 @@ function renderAdminProds(ci){
 
 document.getElementById('btn-add-cat').onclick = () => {
   if(!adminCfg) adminCfg = {nombre:'',fecha:'',categorias:[]};
+  // snapshot labels before re-render
+  document.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
   adminCfg.categorias.push({id:uid(),label:'',productos:[]});
   renderAdminCats();
 };
@@ -350,7 +358,8 @@ document.getElementById('btn-guardar').onclick = () => {
   const nombre = document.getElementById('adm-nombre').value.trim();
   const fecha  = document.getElementById('adm-fecha').value;
   if(!nombre){ alert('Escribe el nombre del evento'); return; }
-  // Filtrar prods vacíos
+  // Snapshot labels from DOM antes de filtrar
+  document.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
   adminCfg.nombre = nombre;
   adminCfg.fecha  = fecha;
   adminCfg.categorias = adminCfg.categorias
