@@ -1,294 +1,515 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Caja Beneficio — ClauNet</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap">
-  <style>
-    :root {
-      --bg:#fff8f0;--surface:#fff;--fg:#1a1008;--fg2:#5a4030;
-      --accent:#e8432d;--accent2:#f7a800;--accent3:#2a9d5c;
-      --border:#f0e0d0;--btn-r:16px;--shadow:0 2px 10px rgba(0,0,0,.10);
-    }
-    @media(prefers-color-scheme:dark){:root{
-      --bg:#1a0f08;--surface:#2a1a10;--fg:#fff0e0;--fg2:#c9a080;--border:#3a2510;
-    }}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;flex-direction:column;padding:0 12px}
-    /* HEADER */
-    .hdr{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;padding:14px 12px;margin:0 -12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.18)}
-    .hdr-title{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800}
-    .hdr-sub{font-size:.72rem;opacity:.85;font-weight:600}
-    .total-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85;text-align:right}
-    .total-amt{font-family:'Nunito',sans-serif;font-size:1.8rem;font-weight:900;line-height:1;text-align:right}
-    /* TABS */
-    .tabs{display:flex;gap:6px;padding:10px 0 6px;overflow-x:auto;scrollbar-width:none}
-    .tabs::-webkit-scrollbar{display:none}
-    .tab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid var(--border);background:var(--surface);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer}
-    .tab.active{background:var(--accent2);border-color:var(--accent2);color:#1a1008}
-    /* GRID */
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px 0}
-    @media(min-width:480px){.grid{grid-template-columns:repeat(3,1fr)}}
-    @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
-    @media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
-    .btn-p{background:var(--surface);border:2px solid var(--border);border-radius:var(--btn-r);padding:14px 10px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .12s}
-    .btn-p:active{transform:scale(.95)}
-    .btn-p .em{font-size:2rem;line-height:1}
-    .btn-p .nm{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg);line-height:1.2}
-    .btn-p .pr{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;color:var(--accent)}
-    .btn-p .bdg{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:900;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-    .btn-p.in-cart{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 12%,var(--surface))}
-    /* CARRITO */
-    .cart{margin-top:8px;background:var(--surface);border-radius:18px;border:2px solid var(--border);overflow:hidden;margin-bottom:16px}
-    .cart-hdr{padding:10px 14px;background:color-mix(in srgb,var(--accent) 10%,var(--surface));font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
-    .cart-empty{padding:18px;text-align:center;color:var(--fg2);font-size:.82rem}
-    .cart-item{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border)}
-    .cart-item:last-child{border-bottom:none}
-    .ci-name{flex:1;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;color:var(--fg)}
-    .qty-ctrl{display:flex;align-items:center;gap:6px}
-    .qty-btn{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--bg);color:var(--fg);font-size:1.1rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif}
-    .qty-n{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;width:20px;text-align:center}
-    .ci-total{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:900;color:var(--accent);min-width:52px;text-align:right}
-    /* ACCIONES */
-    .actions{display:flex;gap:10px;padding-bottom:20px}
-    .btn-limpiar{flex:1;padding:14px;border-radius:14px;border:2px solid var(--border);background:var(--surface);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer}
-    .btn-cobrar{flex:2;padding:14px;border-radius:14px;border:none;background:var(--accent3);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 3px 12px rgba(42,157,92,.35)}
-    .btn-cobrar:disabled{background:var(--border);color:var(--fg2);box-shadow:none;cursor:default}
-    /* MODAL */
-    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
-    .modal{background:var(--surface);border-radius:24px;padding:28px 24px;width:100%;max-width:420px;text-align:center}
-    .modal-emoji{font-size:3rem}
-    .modal-title{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;margin:8px 0 4px;color:var(--fg)}
-    .modal-total{font-family:'Nunito',sans-serif;font-size:2.4rem;font-weight:900;color:var(--accent3);margin-bottom:16px}
-    .modal-items{text-align:left;background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:.82rem;color:var(--fg2);font-family:'Nunito',sans-serif;font-weight:600;display:flex;flex-direction:column;gap:4px}
-    .modal-row{display:flex;justify-content:space-between}
-    .btn-ok{width:100%;padding:16px;border-radius:14px;border:none;background:var(--accent3);color:#fff;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;cursor:pointer;margin-bottom:10px}
-    .btn-print{width:100%;padding:13px;border-radius:14px;border:2px solid var(--accent2);background:transparent;color:var(--accent2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:10px}
-    .btn-cancel{width:100%;padding:12px;border-radius:14px;border:2px solid var(--border);background:transparent;color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer}
-    /* HISTORIAL */
-    .hist-title{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;padding-top:10px}
-    .hist-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-    .hi-num{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;color:var(--fg2)}
-    .hi-desc{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:600;color:var(--fg);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .hi-monto{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--accent3);white-space:nowrap}
-    .total-acum{background:color-mix(in srgb,var(--accent3) 12%,var(--surface));border:2px solid var(--accent3);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .ta-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2)}
-    .ta-monto{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--accent3)}
-    .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;text-decoration:underline}
-    /* PRINT */
-    #ticket-print{display:none}
-    @media print{
-      body>*:not(#ticket-print){display:none!important}
-      #ticket-print{display:block!important;width:72mm;font-family:'Courier New',monospace;font-size:11pt;color:#000;padding:4mm 2mm}
-      .tk-logo{text-align:center;font-size:13pt;font-weight:bold;border-bottom:1px dashed #000;padding-bottom:3mm;margin-bottom:3mm}
-      .tk-meta span{display:block;font-size:9pt}
-      .tk-items{width:100%;border-collapse:collapse;margin:2mm 0}
-      .tk-items td{font-size:10pt;padding:1mm 0;vertical-align:top}
-      .td-price{text-align:right;white-space:nowrap}
-      .tk-sep{border:none;border-top:1px dashed #000;margin:2mm 0}
-      .tk-total{display:flex;justify-content:space-between;font-size:13pt;font-weight:bold;border-top:1px dashed #000;padding-top:2mm;margin-bottom:4mm}
-      .tk-footer{text-align:center;font-size:9pt;border-top:1px dashed #000;padding-top:3mm}
-    }
-    @media(min-width:768px){body{max-width:900px;margin:0 auto}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Caja · ClauNet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#fff8f0;--sur:#fff;--fg:#1a1008;--fg2:#6a5040;--acc:#e8432d;--yel:#f7a800;--grn:#2a9d5c;--bdr:#f0e0d0;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
+@media(prefers-color-scheme:dark){:root{--bg:#1a0f08;--sur:#2a1a10;--fg:#fff0e0;--fg2:#c9a080;--bdr:#3a2510}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh}
+button{font-family:inherit;cursor:pointer}
+
+/* ── VISTAS ── */
+.view{display:none;flex-direction:column;min-height:100dvh}
+.view.active{display:flex}
+
+/* ── HEADER ── */
+.hdr{background:var(--acc);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.hdr-left h1{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;line-height:1.2}
+.hdr-left p{font-size:.7rem;opacity:.8;font-weight:600}
+.hdr-right{text-align:right}
+.hdr-right .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.hdr-right .amt{font-family:'Nunito',sans-serif;font-size:1.9rem;font-weight:900;line-height:1}
+.hdr-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 10px;font-size:.75rem;font-weight:800}
+
+/* ── SCROLL CONTENT ── */
+.content{flex:1;padding:0 14px 24px;max-width:960px;width:100%;margin:0 auto}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:6px;padding:10px 0 6px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid var(--bdr);background:var(--sur);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800}
+.tab-btn.on{background:var(--yel);border-color:var(--yel);color:#1a1008}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:8px 0}
+@media(min-width:480px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
+.prd{background:var(--sur);border:2px solid var(--bdr);border-radius:var(--r);padding:14px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;box-shadow:var(--sh);-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .1s;border:2px solid var(--bdr)}
+.prd:active{transform:scale(.95)}
+.prd .em{font-size:2rem;line-height:1;pointer-events:none}
+.prd .nm{font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;color:var(--fg);line-height:1.2;pointer-events:none}
+.prd .pr{font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:900;color:var(--acc);pointer-events:none}
+.prd .bdg{position:absolute;top:-7px;right:-7px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:900;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.prd.incart{border-color:var(--yel);background:color-mix(in srgb,var(--yel) 12%,var(--sur))}
+
+/* ── CARRITO ── */
+.cart-box{background:var(--sur);border-radius:18px;border:2px solid var(--bdr);overflow:hidden;margin:8px 0 12px}
+.cart-hdr{padding:10px 14px;background:color-mix(in srgb,var(--acc) 10%,var(--sur));font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;color:var(--fg2);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between}
+.cart-empty{padding:18px;text-align:center;color:var(--fg2);font-size:.82rem}
+.citem{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--bdr)}
+.citem:last-child{border-bottom:none}
+.ci-nm{flex:1;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700}
+.qc{display:flex;align-items:center;gap:6px}
+.qb{width:28px;height:28px;border-radius:50%;border:2px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.qn{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;width:18px;text-align:center}
+.ci-sub{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:900;color:var(--acc);min-width:52px;text-align:right}
+
+/* ── ACCIONES ── */
+.acts{display:flex;gap:10px;padding-bottom:16px}
+.btn-limp{flex:1;padding:14px;border-radius:var(--r);border:2px solid var(--bdr);background:var(--sur);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800}
+.btn-cobr{flex:2;padding:14px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;box-shadow:0 3px 12px rgba(42,157,92,.35)}
+.btn-cobr:disabled{background:var(--bdr);color:var(--fg2);box-shadow:none;cursor:default}
+
+/* ── HISTORIAL ── */
+.hist-hdr{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.06em;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between}
+.btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer}
+.total-acum{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:2px solid var(--grn);border-radius:var(--r);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ta-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2)}
+.ta-amt{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--grn)}
+.hitem{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hi-n{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;color:var(--fg2);white-space:nowrap}
+.hi-d{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:600;color:var(--fg);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi-t{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--grn);white-space:nowrap}
+
+/* ── MODAL COBRO ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay[hidden]{display:none}
+.modal{background:var(--sur);border-radius:24px;padding:28px 24px;width:100%;max-width:400px;text-align:center}
+.modal h2{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;margin:8px 0 4px}
+.modal .mtotal{font-family:'Nunito',sans-serif;font-size:2.4rem;font-weight:900;color:var(--grn);margin-bottom:14px}
+.modal .mitems{text-align:left;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:.82rem;color:var(--fg2);display:flex;flex-direction:column;gap:3px}
+.mrow{display:flex;justify-content:space-between;font-family:'Nunito',sans-serif;font-weight:600}
+.mbtn{width:100%;padding:15px;border-radius:var(--r);border:none;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;margin-bottom:8px;cursor:pointer}
+.mbtn-ok{background:var(--grn);color:#fff}
+.mbtn-print{background:transparent;border:2px solid var(--yel)!important;color:var(--yel)}
+.mbtn-back{background:transparent;border:2px solid var(--bdr)!important;color:var(--fg2);font-size:.9rem}
+
+/* ── ADMIN ── */
+.admin-wrap{flex:1;padding:16px;max-width:700px;margin:0 auto;width:100%}
+.admin-wrap h2{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;color:var(--fg);margin-bottom:12px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:.78rem;font-weight:700;color:var(--fg2);margin-bottom:4px}
+.form-group input,.form-group select{width:100%;padding:10px 12px;border-radius:10px;border:2px solid var(--bdr);background:var(--sur);color:var(--fg);font-family:'Nunito Sans',sans-serif;font-size:.9rem}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--acc)}
+.card{background:var(--sur);border-radius:16px;border:2px solid var(--bdr);padding:14px;margin-bottom:10px}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.card-hdr span{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800}
+.prod-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.prod-row input{flex:1;padding:8px 10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg);color:var(--fg);font-family:'Nunito Sans',sans-serif;font-size:.85rem}
+.prod-row input.em-inp{width:54px;flex:none;text-align:center}
+.prod-row input.pr-inp{width:90px;flex:none}
+.btn-del{background:none;border:none;color:var(--fg2);font-size:1.1rem;cursor:pointer;padding:4px}
+.btn-add{background:none;border:2px dashed var(--bdr);color:var(--fg2);border-radius:10px;padding:8px;width:100%;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;margin-top:4px}
+.btn-add-cat{background:none;border:2px dashed var(--bdr);color:var(--fg2);border-radius:var(--r);padding:12px;width:100%;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;margin-bottom:10px}
+.btn-save{width:100%;padding:15px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;margin-top:8px}
+.btn-del-cat{background:none;border:none;color:var(--acc);font-size:.75rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer}
+
+/* ── SETUP (primera vez) ── */
+.setup-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.setup-card{background:var(--sur);border-radius:24px;border:2px solid var(--bdr);padding:28px 24px;width:100%;max-width:420px;text-align:center}
+.setup-card .em{font-size:3rem;margin-bottom:12px}
+.setup-card h1{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;margin-bottom:6px}
+.setup-card p{font-size:.85rem;color:var(--fg2);margin-bottom:20px}
+.btn-setup{width:100%;padding:15px;border-radius:var(--r);border:none;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900}
+
+/* ── TICKET PRINT ── */
+#tkt{display:none}
+@media print{
+  body>*:not(#tkt){display:none!important}
+  #tkt{display:block!important;width:72mm;font-family:'Courier New',monospace;font-size:11pt;color:#000;padding:4mm 2mm}
+  .tl{text-align:center;font-size:13pt;font-weight:bold;border-bottom:1px dashed #000;padding-bottom:3mm;margin-bottom:3mm}
+  .tm span{display:block;font-size:9pt;margin-bottom:1mm}
+  .ti{width:100%;border-collapse:collapse;margin:2mm 0}
+  .ti td{font-size:10pt;padding:1mm 0;vertical-align:top}
+  .tip{text-align:right;white-space:nowrap}
+  .ts{border:none;border-top:1px dashed #000;margin:2mm 0}
+  .tt{display:flex;justify-content:space-between;font-size:13pt;font-weight:bold;border-top:1px dashed #000;padding-top:2mm;margin-bottom:4mm}
+  .tf{text-align:center;font-size:9pt;border-top:1px dashed #000;padding-top:3mm}
+}
+</style>
 </head>
 <body>
 
-<div class="hdr">
-  <div>
-    <div class="hdr-title" id="event-name"></div>
-    <div class="hdr-sub">Caja Rápida · ClauNet</div>
-  </div>
-  <div>
-    <div class="total-lbl">Total venta</div>
-    <div class="total-amt" id="total-display">$0</div>
+<!-- ══ VISTA: SETUP (primera vez) ══ -->
+<div class="view" id="v-setup">
+  <div class="setup-wrap">
+    <div class="setup-card">
+      <div class="em">🧾</div>
+      <h1>Caja Rápida</h1>
+      <p>Configura el evento y los productos antes de comenzar a cobrar.</p>
+      <button class="btn-setup" id="btn-ir-admin">⚙️ Configurar evento</button>
+    </div>
   </div>
 </div>
 
-<div id="tabs-container" class="tabs"></div>
-<div id="grids-container"></div>
-
-<div class="cart">
-  <div class="cart-hdr">
-    <span>🛒 Pedido actual</span>
-    <span id="cart-count" style="color:var(--accent)"></span>
+<!-- ══ VISTA: ADMIN ══ -->
+<div class="view" id="v-admin">
+  <div class="hdr">
+    <div class="hdr-left"><h1>⚙️ Configuración</h1><p>Caja · ClauNet</p></div>
+    <button class="hdr-btn" id="btn-admin-cancel">✕ Cancelar</button>
   </div>
-  <div id="cart-body"><div class="cart-empty">Toca un producto para agregar ☝️</div></div>
+  <div class="admin-wrap">
+    <h2>Evento</h2>
+    <div class="form-group">
+      <label>Nombre del evento</label>
+      <input type="text" id="adm-nombre" placeholder="🎵 Escuela de Talentos">
+    </div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="adm-fecha">
+    </div>
+    <h2 style="margin-top:16px">Categorías y productos</h2>
+    <div id="adm-cats"></div>
+    <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
+    <button class="btn-save" id="btn-guardar">💾 Guardar y cobrar</button>
+  </div>
 </div>
 
-<div class="actions">
-  <button class="btn-limpiar" id="btn-limpiar">🗑️ Limpiar</button>
-  <button class="btn-cobrar" id="btn-cobrar" disabled>✅ Cobrar</button>
+<!-- ══ VISTA: CAJA ══ -->
+<div class="view" id="v-caja">
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1 id="caja-nombre">Caja</h1>
+      <p>Caja Rápida · ClauNet</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="hdr-right">
+        <div class="lbl">Total venta</div>
+        <div class="amt" id="caja-total">$0</div>
+      </div>
+      <button class="hdr-btn" id="btn-ir-admin2">⚙️</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="tabs" id="caja-tabs"></div>
+    <div id="caja-grids"></div>
+    <div class="cart-box">
+      <div class="cart-hdr">
+        <span>🛒 Pedido actual</span>
+        <span id="caja-count" style="color:var(--acc)"></span>
+      </div>
+      <div id="caja-cart"><div class="cart-empty">Toca un producto para agregar ☝️</div></div>
+    </div>
+    <div class="acts">
+      <button class="btn-limp" id="btn-limp">🗑️ Limpiar</button>
+      <button class="btn-cobr" id="btn-cobr" disabled>✅ Cobrar</button>
+    </div>
+  </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-ov" id="modal" hidden>
+<!-- ══ MODAL COBRO ══ -->
+<div class="overlay" id="modal" hidden>
   <div class="modal">
-    <div class="modal-emoji">🎉</div>
-    <div class="modal-title">¡A cobrar!</div>
-    <div class="modal-total" id="modal-total"></div>
-    <div class="modal-items" id="modal-items"></div>
-    <button class="btn-ok" id="btn-confirmar">💵 Cobrado — Nueva venta</button>
-    <button class="btn-print" id="btn-imprimir">🖨️ Imprimir ticket</button>
-    <button class="btn-cancel" id="btn-volver">← Volver al pedido</button>
+    <div style="font-size:3rem">🎉</div>
+    <h2>¡A cobrar!</h2>
+    <div class="mtotal" id="m-total"></div>
+    <div class="mitems" id="m-items"></div>
+    <button class="mbtn mbtn-ok" id="m-ok">💵 Cobrado — Nueva venta</button>
+    <button class="mbtn mbtn-print" id="m-print">🖨️ Imprimir ticket</button>
+    <button class="mbtn mbtn-back" id="m-back">← Volver al pedido</button>
   </div>
 </div>
 
 <!-- TICKET IMPRESIÓN -->
-<div id="ticket-print">
-  <div class="tk-logo" id="tk-logo"></div>
-  <div class="tk-meta"><span id="tk-num"></span><span id="tk-fecha"></span></div>
-  <table class="tk-items" id="tk-items"></table>
-  <hr class="tk-sep">
-  <div class="tk-total"><span>TOTAL</span><span id="tk-total"></span></div>
-  <div class="tk-footer">¡Gracias! 🎉<br>ClauNet · caja.claunet.cl</div>
+<div id="tkt">
+  <div class="tl" id="tl"></div>
+  <div class="tm"><span id="tn"></span><span id="tf2"></span></div>
+  <table class="ti" id="ti"></table>
+  <hr class="ts">
+  <div class="tt"><span>TOTAL</span><span id="tt"></span></div>
+  <div class="tf">¡Gracias! 🎉 · ClauNet</div>
 </div>
 
-<script src="config.js?v=7"></script>
 <script>
-// Estado
-let carrito = {}, historial = [], ventaNum = 1, tabActivo = CATEGORIAS[0].id;
-try { historial = JSON.parse(localStorage.getItem('caja_hist')||'[]'); ventaNum = historial.length+1; } catch(e){}
+// ═══════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════
+const LS_CFG  = 'caja_cfg';
+const LS_HIST = 'caja_hist';
 
-const fmt = n => '$'+n.toLocaleString('es-CL');
-const getProd = id => { for(const c of CATEGORIAS){ const p=c.productos.find(x=>x.id===id); if(p) return p; } };
+let cfg = null;        // {nombre, fecha, categorias}
+let carrito = {};      // {id: qty}
+let historial = [];
+let ventaNum = 1;
+let tabActivo = '';
+
+const fmt = n => '$' + n.toLocaleString('es-CL');
+const getProd = id => { for(const c of cfg.categorias){ const p = c.productos.find(x=>x.id===id); if(p) return p; } };
+const uid = () => Math.random().toString(36).slice(2,8);
+
+// ═══════════════════════════════════════
+//  VISTAS
+// ═══════════════════════════════════════
+function showView(id){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══════════════════════════════════════
+//  ARRANQUE
+// ═══════════════════════════════════════
+(function init(){
+  try { historial = JSON.parse(localStorage.getItem(LS_HIST)||'[]'); ventaNum = historial.length+1; } catch(e){}
+  try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
+
+  if(!cfg || !cfg.categorias || !cfg.categorias.length){
+    showView('v-setup');
+  } else {
+    abrirCaja();
+  }
+})();
+
+// ═══════════════════════════════════════
+//  SETUP
+// ═══════════════════════════════════════
+document.getElementById('btn-ir-admin').onclick = () => abrirAdmin(false);
+
+// ═══════════════════════════════════════
+//  ADMIN
+// ═══════════════════════════════════════
+let adminCfg = null; // copia editable
+
+function abrirAdmin(cancelable){
+  adminCfg = cfg ? JSON.parse(JSON.stringify(cfg)) : { nombre:'', fecha: new Date().toISOString().slice(0,10), categorias:[] };
+  document.getElementById('adm-nombre').value = adminCfg.nombre || '';
+  document.getElementById('adm-fecha').value  = adminCfg.fecha  || '';
+  document.getElementById('btn-admin-cancel').style.display = cancelable ? '' : 'none';
+  renderAdminCats();
+  showView('v-admin');
+}
+
+function renderAdminCats(){
+  const cont = document.getElementById('adm-cats');
+  cont.innerHTML = '';
+  adminCfg.categorias.forEach((cat, ci) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-hdr">
+        <span>Categoría ${ci+1}</span>
+        <button class="btn-del-cat" data-ci="${ci}">🗑 Eliminar</button>
+      </div>
+      <div class="form-group" style="margin-bottom:8px">
+        <label>Nombre (con emoji)</label>
+        <input type="text" class="cat-nombre" data-ci="${ci}" value="${cat.label||''}" placeholder="🍔 Comida">
+      </div>
+      <div id="prods-${ci}"></div>
+      <button class="btn-add" data-ci="${ci}">＋ Agregar producto</button>`;
+    cont.appendChild(card);
+    renderAdminProds(ci);
+  });
+
+  cont.querySelectorAll('.btn-del-cat').forEach(b => b.onclick = () => {
+    adminCfg.categorias.splice(+b.dataset.ci, 1);
+    renderAdminCats();
+  });
+  cont.querySelectorAll('.cat-nombre').forEach(inp => inp.oninput = () => {
+    adminCfg.categorias[+inp.dataset.ci].label = inp.value;
+  });
+  cont.querySelectorAll('.btn-add').forEach(b => b.onclick = () => {
+    adminCfg.categorias[+b.dataset.ci].productos.push({id:uid(),emoji:'🎁',nombre:'',precio:0});
+    renderAdminCats();
+  });
+}
+
+function renderAdminProds(ci){
+  const cont = document.getElementById('prods-'+ci);
+  cont.innerHTML = '';
+  adminCfg.categorias[ci].productos.forEach((p, pi) => {
+    const row = document.createElement('div');
+    row.className = 'prod-row';
+    row.innerHTML = `
+      <input class="em-inp" type="text" value="${p.emoji}" placeholder="🍕" maxlength="4">
+      <input type="text" value="${p.nombre}" placeholder="Nombre producto" style="flex:1">
+      <input class="pr-inp" type="number" value="${p.precio}" placeholder="Precio" min="0" step="100">
+      <button class="btn-del">✕</button>`;
+    row.querySelector('.em-inp').oninput   = e => { p.emoji  = e.target.value; };
+    row.querySelectorAll('input')[1].oninput = e => { p.nombre = e.target.value; };
+    row.querySelector('.pr-inp').oninput   = e => { p.precio = parseInt(e.target.value)||0; };
+    row.querySelector('.btn-del').onclick  = () => {
+      adminCfg.categorias[ci].productos.splice(pi,1);
+      renderAdminProds(ci);
+    };
+    cont.appendChild(row);
+  });
+}
+
+document.getElementById('btn-add-cat').onclick = () => {
+  if(!adminCfg) adminCfg = {nombre:'',fecha:'',categorias:[]};
+  adminCfg.categorias.push({id:uid(),label:'',productos:[]});
+  renderAdminCats();
+};
+
+document.getElementById('btn-guardar').onclick = () => {
+  const nombre = document.getElementById('adm-nombre').value.trim();
+  const fecha  = document.getElementById('adm-fecha').value;
+  if(!nombre){ alert('Escribe el nombre del evento'); return; }
+  // Filtrar prods vacíos
+  adminCfg.nombre = nombre;
+  adminCfg.fecha  = fecha;
+  adminCfg.categorias = adminCfg.categorias
+    .filter(c => c.label.trim())
+    .map(c => ({ ...c, productos: c.productos.filter(p => p.nombre.trim()) }))
+    .filter(c => c.productos.length);
+  if(!adminCfg.categorias.length){ alert('Agrega al menos una categoría con productos'); return; }
+  cfg = adminCfg;
+  localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+  carrito = {};
+  abrirCaja();
+};
+
+document.getElementById('btn-admin-cancel').onclick = () => { if(cfg) abrirCaja(); };
+document.getElementById('btn-ir-admin2').onclick    = () => abrirAdmin(true);
+
+// ═══════════════════════════════════════
+//  CAJA
+// ═══════════════════════════════════════
+function abrirCaja(){
+  document.getElementById('caja-nombre').textContent = cfg.nombre || 'Caja';
+  tabActivo = cfg.categorias[0].id;
+  renderTabs();
+  renderGrids();
+  renderCarrito();
+  showView('v-caja');
+}
 
 // TABS
 function renderTabs(){
-  const c = document.getElementById('tabs-container');
-  c.innerHTML = '';
-  [...CATEGORIAS.map(c=>({id:c.id,label:c.label})),{id:'historial',label:'📋 Historial'}].forEach(t=>{
+  const cont = document.getElementById('caja-tabs');
+  cont.innerHTML = '';
+  [...cfg.categorias.map(c=>({id:c.id,label:c.label})),{id:'historial',label:'📋 Historial'}].forEach(t=>{
     const b = document.createElement('button');
-    b.className = 'tab'+(t.id===tabActivo?' active':'');
+    b.className = 'tab-btn'+(t.id===tabActivo?' on':'');
     b.textContent = t.label;
-    b.onclick = ()=>setTab(t.id);
-    c.appendChild(b);
+    b.onclick = () => setTab(t.id);
+    cont.appendChild(b);
   });
 }
 function setTab(id){
-  tabActivo=id; renderTabs();
+  tabActivo = id; renderTabs();
   document.querySelectorAll('.tab-content').forEach(el=>el.hidden=true);
-  const el=document.getElementById('tab-'+id);
-  if(el) el.hidden=false;
+  const el = document.getElementById('tab-'+id);
+  if(el) el.hidden = false;
   if(id==='historial') renderHistorial();
 }
 
 // GRIDS
 function renderGrids(){
-  const c = document.getElementById('grids-container');
-  c.innerHTML = '';
-  CATEGORIAS.forEach((cat,i)=>{
-    const div = document.createElement('div');
-    div.id = 'tab-'+cat.id; div.className='tab-content'; div.hidden=(i!==0);
+  const cont = document.getElementById('caja-grids');
+  cont.innerHTML = '';
+  cfg.categorias.forEach((cat,i)=>{
+    const wrap = document.createElement('div');
+    wrap.id = 'tab-'+cat.id; wrap.className='tab-content'; wrap.hidden=(i!==0);
     const grid = document.createElement('div'); grid.className='grid';
     cat.productos.forEach(p=>{
       const btn = document.createElement('button');
-      btn.className='btn-p'; btn.id='btn-'+p.id;
+      btn.className='prd'; btn.id='btn-'+p.id;
       btn.innerHTML=`<span class="em">${p.emoji}</span><span class="nm">${p.nombre}</span><span class="pr">${fmt(p.precio)}</span>`;
       btn.onclick=()=>agregar(p.id);
       grid.appendChild(btn);
     });
-    div.appendChild(grid); c.appendChild(div);
+    wrap.appendChild(grid); cont.appendChild(wrap);
   });
-  const h=document.createElement('div'); h.id='tab-historial'; h.className='tab-content'; h.hidden=true;
-  c.appendChild(h);
+  const h = document.createElement('div'); h.id='tab-historial'; h.className='tab-content'; h.hidden=true;
+  cont.appendChild(h);
 }
 
 // CARRITO
 function agregar(id){ carrito[id]=(carrito[id]||0)+1; renderCarrito(); renderBadges(); }
-function cambiarQty(id,delta){ const n=(carrito[id]||0)+delta; if(n<=0) delete carrito[id]; else carrito[id]=n; renderCarrito(); renderBadges(); }
+function cambiarQty(id,d){ const n=(carrito[id]||0)+d; if(n<=0) delete carrito[id]; else carrito[id]=n; renderCarrito(); renderBadges(); }
 
 function renderBadges(){
-  document.querySelectorAll('.btn-p').forEach(b=>{ b.classList.remove('in-cart'); const bdg=b.querySelector('.bdg'); if(bdg) bdg.remove(); });
-  Object.entries(carrito).forEach(([id,qty])=>{
+  document.querySelectorAll('.prd').forEach(b=>{ b.classList.remove('incart'); const bdg=b.querySelector('.bdg'); if(bdg) bdg.remove(); });
+  Object.entries(carrito).forEach(([id,q])=>{
     const btn=document.getElementById('btn-'+id); if(!btn) return;
-    btn.classList.add('in-cart');
-    const bdg=document.createElement('span'); bdg.className='bdg'; bdg.textContent=qty; btn.appendChild(bdg);
+    btn.classList.add('incart');
+    const bdg=document.createElement('span'); bdg.className='bdg'; bdg.textContent=q; btn.appendChild(bdg);
   });
 }
 
 function renderCarrito(){
-  const ids=Object.keys(carrito);
-  const body=document.getElementById('cart-body');
-  const countEl=document.getElementById('cart-count');
-  const btnC=document.getElementById('btn-cobrar');
-  if(ids.length===0){
+  const ids = Object.keys(carrito);
+  const body = document.getElementById('caja-cart');
+  const btnC = document.getElementById('btn-cobr');
+  if(!ids.length){
     body.innerHTML='<div class="cart-empty">Toca un producto para agregar ☝️</div>';
-    countEl.textContent='';
-    document.getElementById('total-display').textContent='$0';
+    document.getElementById('caja-count').textContent='';
+    document.getElementById('caja-total').textContent='$0';
     btnC.disabled=true; return;
   }
-  let total=0,count=0; body.innerHTML='';
+  let total=0, count=0;
+  body.innerHTML='';
   ids.forEach(id=>{
-    const p=getProd(id),qty=carrito[id],sub=p.precio*qty; total+=sub; count+=qty;
-    const div=document.createElement('div'); div.className='cart-item';
-    div.innerHTML=`<span style="font-size:1.2rem">${p.emoji}</span><span class="ci-name">${p.nombre}</span><div class="qty-ctrl"><button class="qty-btn" data-id="${id}" data-d="-1">−</button><span class="qty-n">${qty}</span><button class="qty-btn" data-id="${id}" data-d="1">+</button></div><span class="ci-total">${fmt(sub)}</span>`;
+    const p=getProd(id), q=carrito[id], sub=p.precio*q;
+    total+=sub; count+=q;
+    const div=document.createElement('div'); div.className='citem';
+    div.innerHTML=`<span style="font-size:1.2rem">${p.emoji}</span><span class="ci-nm">${p.nombre}</span><div class="qc"><button class="qb" data-id="${id}" data-d="-1">−</button><span class="qn">${q}</span><button class="qb" data-id="${id}" data-d="1">+</button></div><span class="ci-sub">${fmt(sub)}</span>`;
     body.appendChild(div);
   });
-  body.querySelectorAll('.qty-btn').forEach(b=>b.onclick=()=>cambiarQty(b.dataset.id,+b.dataset.d));
-  countEl.textContent=count+' ítem'+(count!==1?'s':'');
-  document.getElementById('total-display').textContent=fmt(total);
+  body.querySelectorAll('.qb').forEach(b=>b.onclick=()=>cambiarQty(b.dataset.id,+b.dataset.d));
+  document.getElementById('caja-count').textContent=count+' ítem'+(count!==1?'s':'');
+  document.getElementById('caja-total').textContent=fmt(total);
   btnC.disabled=false;
 }
 
 function totalCarrito(){ return Object.entries(carrito).reduce((a,[id,q])=>a+getProd(id).precio*q,0); }
-function limpiarCarrito(){ carrito={}; renderCarrito(); renderBadges(); }
+
+document.getElementById('btn-limp').onclick=()=>{ carrito={}; renderCarrito(); renderBadges(); };
 
 // MODAL
-function abrirModal(){
+document.getElementById('btn-cobr').onclick=()=>{
   const ids=Object.keys(carrito); if(!ids.length) return;
-  document.getElementById('modal-total').textContent=fmt(totalCarrito());
-  document.getElementById('modal-items').innerHTML=ids.map(id=>{
+  document.getElementById('m-total').textContent=fmt(totalCarrito());
+  document.getElementById('m-items').innerHTML=ids.map(id=>{
     const p=getProd(id),q=carrito[id];
-    return `<div class="modal-row"><span>${p.emoji} ${p.nombre} ×${q}</span><span>${fmt(p.precio*q)}</span></div>`;
+    return `<div class="mrow"><span>${p.emoji} ${p.nombre} ×${q}</span><span>${fmt(p.precio*q)}</span></div>`;
   }).join('');
   document.getElementById('modal').hidden=false;
-}
-function cerrarModal(){ document.getElementById('modal').hidden=true; }
+};
 
-function confirmarCobro(){
+document.getElementById('m-back').onclick=()=>{ document.getElementById('modal').hidden=true; };
+document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')) document.getElementById('modal').hidden=true; };
+
+document.getElementById('m-ok').onclick=()=>{
   const ids=Object.keys(carrito); if(!ids.length) return;
   const total=totalCarrito();
   const desc=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `${p.emoji}${p.nombre}${q>1?' ×'+q:''}`; }).join(', ');
   historial.unshift({num:ventaNum++,desc,total});
-  try{ localStorage.setItem('caja_hist',JSON.stringify(historial)); }catch(e){}
-  limpiarCarrito(); cerrarModal(); setTab('historial');
-  setTimeout(()=>setTab(CATEGORIAS[0].id),1800);
-}
+  try{ localStorage.setItem(LS_HIST,JSON.stringify(historial)); }catch(e){}
+  carrito={}; renderCarrito(); renderBadges();
+  document.getElementById('modal').hidden=true;
+  setTab('historial');
+  setTimeout(()=>setTab(cfg.categorias[0].id),1800);
+};
 
-function imprimirTicket(){
+document.getElementById('m-print').onclick=()=>{
   const ids=Object.keys(carrito); if(!ids.length) return;
   const now=new Date();
-  document.getElementById('tk-logo').textContent=EVENTO.nombre;
-  document.getElementById('tk-num').textContent='Venta #'+ventaNum;
-  document.getElementById('tk-fecha').textContent=now.toLocaleDateString('es-CL',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('tk-total').textContent=fmt(totalCarrito());
-  document.getElementById('tk-items').innerHTML=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `<tr><td>${p.emoji} ${p.nombre}${q>1?' ×'+q:''}</td><td class="td-price">${fmt(p.precio*q)}</td></tr>`; }).join('');
+  document.getElementById('tl').textContent=cfg.nombre;
+  document.getElementById('tn').textContent='Venta #'+ventaNum;
+  document.getElementById('tf2').textContent=now.toLocaleDateString('es-CL',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('tt').textContent=fmt(totalCarrito());
+  document.getElementById('ti').innerHTML=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `<tr><td>${p.emoji} ${p.nombre}${q>1?' ×'+q:''}</td><td class="tip">${fmt(p.precio*q)}</td></tr>`; }).join('');
   window.print();
-}
+};
 
 // HISTORIAL
 function renderHistorial(){
   const sec=document.getElementById('tab-historial');
-  if(!historial.length){ sec.innerHTML='<div class="cart-empty" style="padding:24px;text-align:center">Sin ventas aún 🎵</div>'; return; }
-  const totalAcum=historial.reduce((a,v)=>a+v.total,0);
-  sec.innerHTML=`<div class="hist-title"><span>Ventas (${historial.length})</span><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div>
-    <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-monto">${fmt(totalAcum)}</span></div>
-    ${historial.map(v=>`<div class="hist-item"><span class="hi-num">#${v.num}</span><span class="hi-desc">${v.desc}</span><span class="hi-monto">${fmt(v.total)}</span></div>`).join('')}`;
-  document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem('caja_hist');}catch(e){} renderHistorial(); };
+  if(!historial.length){ sec.innerHTML='<div class="cart-empty" style="padding:28px;text-align:center">Sin ventas aún 🎵</div>'; return; }
+  const tot=historial.reduce((a,v)=>a+v.total,0);
+  sec.innerHTML=`
+    <div class="hist-hdr"><span>Ventas (${historial.length})</span><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div>
+    <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-amt">${fmt(tot)}</span></div>
+    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}</span><span class="hi-d">${v.desc}</span><span class="hi-t">${fmt(v.total)}</span></div>`).join('')}`;
+  document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial(); };
 }
-
-// INIT
-document.getElementById('event-name').textContent=EVENTO.nombre;
-renderTabs(); renderGrids(); renderCarrito();
-document.getElementById('btn-cobrar').onclick=abrirModal;
-document.getElementById('btn-limpiar').onclick=limpiarCarrito;
-document.getElementById('btn-confirmar').onclick=confirmarCobro;
-document.getElementById('btn-imprimir').onclick=imprimirTicket;
-document.getElementById('btn-volver').onclick=cerrarModal;
-document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')) cerrarModal(); };
 </script>
 </body>
 </html>
