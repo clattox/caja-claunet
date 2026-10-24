@@ -106,6 +106,7 @@ body::before {
 .actions { display: flex; gap: 10px; padding-bottom: 20px; }
 .btn-limpiar { flex: 1; padding: 14px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface); color: var(--fg2); font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .btn-cobrar { flex: 2; padding: 14px; border-radius: 14px; border: none; background: var(--accent3); color: #fff; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 900; cursor: pointer; box-shadow: 0 3px 12px rgba(42,157,92,0.35); -webkit-tap-highlight-color: transparent; }
+.btn-cobrar:disabled { background: var(--border); color: var(--fg2); box-shadow: none; cursor: default; }
 .btn-cobrar:active, .btn-limpiar:active { transform: scale(0.97); }
 
 /* MODAL */

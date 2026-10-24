@@ -109,6 +109,8 @@ function renderCarrito() {
     body.innerHTML = '<div class="cart-empty">Toca un producto para agregar ☝️</div>';
     countEl.textContent = '';
     document.getElementById('total-display').textContent = '$0';
+    const btnC = document.getElementById('btn-cobrar');
+    if (btnC) btnC.disabled = true;
     return;
   }
 
@@ -136,6 +138,8 @@ function renderCarrito() {
   body.innerHTML = html;
   countEl.textContent = itemCount + ' ítem' + (itemCount !== 1 ? 's' : '');
   document.getElementById('total-display').textContent = fmt(total);
+  const btnCobrar = document.getElementById('btn-cobrar');
+  if (btnCobrar) btnCobrar.disabled = false;
 }
 
 function totalCarrito() {
