@@ -6,79 +6,289 @@
   <title>Caja Beneficio — ClauNet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=7">
+  <style>
+    :root {
+      --bg:#fff8f0;--surface:#fff;--fg:#1a1008;--fg2:#5a4030;
+      --accent:#e8432d;--accent2:#f7a800;--accent3:#2a9d5c;
+      --border:#f0e0d0;--btn-r:16px;--shadow:0 2px 10px rgba(0,0,0,.10);
+    }
+    @media(prefers-color-scheme:dark){:root{
+      --bg:#1a0f08;--surface:#2a1a10;--fg:#fff0e0;--fg2:#c9a080;--border:#3a2510;
+    }}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;flex-direction:column;padding:0 12px}
+    /* HEADER */
+    .hdr{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;padding:14px 12px;margin:0 -12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+    .hdr-title{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800}
+    .hdr-sub{font-size:.72rem;opacity:.85;font-weight:600}
+    .total-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85;text-align:right}
+    .total-amt{font-family:'Nunito',sans-serif;font-size:1.8rem;font-weight:900;line-height:1;text-align:right}
+    /* TABS */
+    .tabs{display:flex;gap:6px;padding:10px 0 6px;overflow-x:auto;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid var(--border);background:var(--surface);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;cursor:pointer}
+    .tab.active{background:var(--accent2);border-color:var(--accent2);color:#1a1008}
+    /* GRID */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px 0}
+    @media(min-width:480px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}}
+    @media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
+    .btn-p{background:var(--surface);border:2px solid var(--border);border-radius:var(--btn-r);padding:14px 10px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;box-shadow:var(--shadow);-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .12s}
+    .btn-p:active{transform:scale(.95)}
+    .btn-p .em{font-size:2rem;line-height:1}
+    .btn-p .nm{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg);line-height:1.2}
+    .btn-p .pr{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;color:var(--accent)}
+    .btn-p .bdg{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#fff;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:900;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .btn-p.in-cart{border-color:var(--accent2);background:color-mix(in srgb,var(--accent2) 12%,var(--surface))}
+    /* CARRITO */
+    .cart{margin-top:8px;background:var(--surface);border-radius:18px;border:2px solid var(--border);overflow:hidden;margin-bottom:16px}
+    .cart-hdr{padding:10px 14px;background:color-mix(in srgb,var(--accent) 10%,var(--surface));font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+    .cart-empty{padding:18px;text-align:center;color:var(--fg2);font-size:.82rem}
+    .cart-item{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border)}
+    .cart-item:last-child{border-bottom:none}
+    .ci-name{flex:1;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;color:var(--fg)}
+    .qty-ctrl{display:flex;align-items:center;gap:6px}
+    .qty-btn{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--bg);color:var(--fg);font-size:1.1rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif}
+    .qty-n{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;width:20px;text-align:center}
+    .ci-total{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:900;color:var(--accent);min-width:52px;text-align:right}
+    /* ACCIONES */
+    .actions{display:flex;gap:10px;padding-bottom:20px}
+    .btn-limpiar{flex:1;padding:14px;border-radius:14px;border:2px solid var(--border);background:var(--surface);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer}
+    .btn-cobrar{flex:2;padding:14px;border-radius:14px;border:none;background:var(--accent3);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 3px 12px rgba(42,157,92,.35)}
+    .btn-cobrar:disabled{background:var(--border);color:var(--fg2);box-shadow:none;cursor:default}
+    /* MODAL */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:var(--surface);border-radius:24px;padding:28px 24px;width:100%;max-width:420px;text-align:center}
+    .modal-emoji{font-size:3rem}
+    .modal-title{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;margin:8px 0 4px;color:var(--fg)}
+    .modal-total{font-family:'Nunito',sans-serif;font-size:2.4rem;font-weight:900;color:var(--accent3);margin-bottom:16px}
+    .modal-items{text-align:left;background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:.82rem;color:var(--fg2);font-family:'Nunito',sans-serif;font-weight:600;display:flex;flex-direction:column;gap:4px}
+    .modal-row{display:flex;justify-content:space-between}
+    .btn-ok{width:100%;padding:16px;border-radius:14px;border:none;background:var(--accent3);color:#fff;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;cursor:pointer;margin-bottom:10px}
+    .btn-print{width:100%;padding:13px;border-radius:14px;border:2px solid var(--accent2);background:transparent;color:var(--accent2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:10px}
+    .btn-cancel{width:100%;padding:12px;border-radius:14px;border:2px solid var(--border);background:transparent;color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer}
+    /* HISTORIAL */
+    .hist-title{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;padding-top:10px}
+    .hist-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+    .hi-num{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;color:var(--fg2)}
+    .hi-desc{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:600;color:var(--fg);flex:1;margin:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .hi-monto{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--accent3);white-space:nowrap}
+    .total-acum{background:color-mix(in srgb,var(--accent3) 12%,var(--surface));border:2px solid var(--accent3);border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .ta-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2)}
+    .ta-monto{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--accent3)}
+    .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;text-decoration:underline}
+    /* PRINT */
+    #ticket-print{display:none}
+    @media print{
+      body>*:not(#ticket-print){display:none!important}
+      #ticket-print{display:block!important;width:72mm;font-family:'Courier New',monospace;font-size:11pt;color:#000;padding:4mm 2mm}
+      .tk-logo{text-align:center;font-size:13pt;font-weight:bold;border-bottom:1px dashed #000;padding-bottom:3mm;margin-bottom:3mm}
+      .tk-meta span{display:block;font-size:9pt}
+      .tk-items{width:100%;border-collapse:collapse;margin:2mm 0}
+      .tk-items td{font-size:10pt;padding:1mm 0;vertical-align:top}
+      .td-price{text-align:right;white-space:nowrap}
+      .tk-sep{border:none;border-top:1px dashed #000;margin:2mm 0}
+      .tk-total{display:flex;justify-content:space-between;font-size:13pt;font-weight:bold;border-top:1px dashed #000;padding-top:2mm;margin-bottom:4mm}
+      .tk-footer{text-align:center;font-size:9pt;border-top:1px dashed #000;padding-top:3mm}
+    }
+    @media(min-width:768px){body{max-width:900px;margin:0 auto}}
+  </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <div class="header-title" id="event-name">🎵 Beneficio</div>
-    <div class="header-sub">Caja Rápida · ClauNet</div>
+<div class="hdr">
+  <div>
+    <div class="hdr-title" id="event-name"></div>
+    <div class="hdr-sub">Caja Rápida · ClauNet</div>
   </div>
-  <div class="total-display">
-    <div class="total-label">Total venta</div>
-    <div class="total-amount" id="total-display">$0</div>
+  <div>
+    <div class="total-lbl">Total venta</div>
+    <div class="total-amt" id="total-display">$0</div>
   </div>
 </div>
 
-<div id="app">
-
-<!-- TABS -->
-<div class="tabs" id="tabs-container"></div>
-
-<!-- GRIDS por categoría -->
+<div id="tabs-container" class="tabs"></div>
 <div id="grids-container"></div>
 
-<!-- CARRITO -->
-<div id="cart-section" class="cart-section">
-  <div class="cart-header">
+<div class="cart">
+  <div class="cart-hdr">
     <span>🛒 Pedido actual</span>
     <span id="cart-count" style="color:var(--accent)"></span>
   </div>
-  <div id="cart-body">
-    <div class="cart-empty">Toca un producto para agregar ☝️</div>
-  </div>
+  <div id="cart-body"><div class="cart-empty">Toca un producto para agregar ☝️</div></div>
 </div>
 
-<!-- ACCIONES -->
 <div class="actions">
   <button class="btn-limpiar" id="btn-limpiar">🗑️ Limpiar</button>
   <button class="btn-cobrar" id="btn-cobrar" disabled>✅ Cobrar</button>
 </div>
 
-</div>
-
 <!-- MODAL -->
-<div class="modal-overlay" id="modal" hidden>
+<div class="modal-ov" id="modal" hidden>
   <div class="modal">
     <div class="modal-emoji">🎉</div>
     <div class="modal-title">¡A cobrar!</div>
     <div class="modal-total" id="modal-total"></div>
     <div class="modal-items" id="modal-items"></div>
-    <button class="modal-btn-ok" id="btn-confirmar">💵 Cobrado — Nueva venta</button>
-    <button class="modal-btn-print" id="btn-imprimir">🖨️ Imprimir ticket</button>
-    <button class="modal-btn-cancel" id="btn-volver">← Volver al pedido</button>
+    <button class="btn-ok" id="btn-confirmar">💵 Cobrado — Nueva venta</button>
+    <button class="btn-print" id="btn-imprimir">🖨️ Imprimir ticket</button>
+    <button class="btn-cancel" id="btn-volver">← Volver al pedido</button>
   </div>
 </div>
 
-<!-- TICKET DE IMPRESIÓN (oculto en pantalla, visible solo al imprimir) -->
+<!-- TICKET IMPRESIÓN -->
 <div id="ticket-print">
   <div class="tk-logo" id="tk-logo"></div>
-  <div class="tk-meta">
-    <span id="tk-num"></span>
-    <span id="tk-fecha"></span>
-  </div>
+  <div class="tk-meta"><span id="tk-num"></span><span id="tk-fecha"></span></div>
   <table class="tk-items" id="tk-items"></table>
   <hr class="tk-sep">
-  <div class="tk-total">
-    <span>TOTAL</span>
-    <span id="tk-total"></span>
-  </div>
+  <div class="tk-total"><span>TOTAL</span><span id="tk-total"></span></div>
   <div class="tk-footer">¡Gracias! 🎉<br>ClauNet · caja.claunet.cl</div>
 </div>
 
 <script src="config.js?v=7"></script>
-<script src="app.js?v=7"></script>
+<script>
+// Estado
+let carrito = {}, historial = [], ventaNum = 1, tabActivo = CATEGORIAS[0].id;
+try { historial = JSON.parse(localStorage.getItem('caja_hist')||'[]'); ventaNum = historial.length+1; } catch(e){}
+
+const fmt = n => '$'+n.toLocaleString('es-CL');
+const getProd = id => { for(const c of CATEGORIAS){ const p=c.productos.find(x=>x.id===id); if(p) return p; } };
+
+// TABS
+function renderTabs(){
+  const c = document.getElementById('tabs-container');
+  c.innerHTML = '';
+  [...CATEGORIAS.map(c=>({id:c.id,label:c.label})),{id:'historial',label:'📋 Historial'}].forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'tab'+(t.id===tabActivo?' active':'');
+    b.textContent = t.label;
+    b.onclick = ()=>setTab(t.id);
+    c.appendChild(b);
+  });
+}
+function setTab(id){
+  tabActivo=id; renderTabs();
+  document.querySelectorAll('.tab-content').forEach(el=>el.hidden=true);
+  const el=document.getElementById('tab-'+id);
+  if(el) el.hidden=false;
+  if(id==='historial') renderHistorial();
+}
+
+// GRIDS
+function renderGrids(){
+  const c = document.getElementById('grids-container');
+  c.innerHTML = '';
+  CATEGORIAS.forEach((cat,i)=>{
+    const div = document.createElement('div');
+    div.id = 'tab-'+cat.id; div.className='tab-content'; div.hidden=(i!==0);
+    const grid = document.createElement('div'); grid.className='grid';
+    cat.productos.forEach(p=>{
+      const btn = document.createElement('button');
+      btn.className='btn-p'; btn.id='btn-'+p.id;
+      btn.innerHTML=`<span class="em">${p.emoji}</span><span class="nm">${p.nombre}</span><span class="pr">${fmt(p.precio)}</span>`;
+      btn.onclick=()=>agregar(p.id);
+      grid.appendChild(btn);
+    });
+    div.appendChild(grid); c.appendChild(div);
+  });
+  const h=document.createElement('div'); h.id='tab-historial'; h.className='tab-content'; h.hidden=true;
+  c.appendChild(h);
+}
+
+// CARRITO
+function agregar(id){ carrito[id]=(carrito[id]||0)+1; renderCarrito(); renderBadges(); }
+function cambiarQty(id,delta){ const n=(carrito[id]||0)+delta; if(n<=0) delete carrito[id]; else carrito[id]=n; renderCarrito(); renderBadges(); }
+
+function renderBadges(){
+  document.querySelectorAll('.btn-p').forEach(b=>{ b.classList.remove('in-cart'); const bdg=b.querySelector('.bdg'); if(bdg) bdg.remove(); });
+  Object.entries(carrito).forEach(([id,qty])=>{
+    const btn=document.getElementById('btn-'+id); if(!btn) return;
+    btn.classList.add('in-cart');
+    const bdg=document.createElement('span'); bdg.className='bdg'; bdg.textContent=qty; btn.appendChild(bdg);
+  });
+}
+
+function renderCarrito(){
+  const ids=Object.keys(carrito);
+  const body=document.getElementById('cart-body');
+  const countEl=document.getElementById('cart-count');
+  const btnC=document.getElementById('btn-cobrar');
+  if(ids.length===0){
+    body.innerHTML='<div class="cart-empty">Toca un producto para agregar ☝️</div>';
+    countEl.textContent='';
+    document.getElementById('total-display').textContent='$0';
+    btnC.disabled=true; return;
+  }
+  let total=0,count=0; body.innerHTML='';
+  ids.forEach(id=>{
+    const p=getProd(id),qty=carrito[id],sub=p.precio*qty; total+=sub; count+=qty;
+    const div=document.createElement('div'); div.className='cart-item';
+    div.innerHTML=`<span style="font-size:1.2rem">${p.emoji}</span><span class="ci-name">${p.nombre}</span><div class="qty-ctrl"><button class="qty-btn" data-id="${id}" data-d="-1">−</button><span class="qty-n">${qty}</span><button class="qty-btn" data-id="${id}" data-d="1">+</button></div><span class="ci-total">${fmt(sub)}</span>`;
+    body.appendChild(div);
+  });
+  body.querySelectorAll('.qty-btn').forEach(b=>b.onclick=()=>cambiarQty(b.dataset.id,+b.dataset.d));
+  countEl.textContent=count+' ítem'+(count!==1?'s':'');
+  document.getElementById('total-display').textContent=fmt(total);
+  btnC.disabled=false;
+}
+
+function totalCarrito(){ return Object.entries(carrito).reduce((a,[id,q])=>a+getProd(id).precio*q,0); }
+function limpiarCarrito(){ carrito={}; renderCarrito(); renderBadges(); }
+
+// MODAL
+function abrirModal(){
+  const ids=Object.keys(carrito); if(!ids.length) return;
+  document.getElementById('modal-total').textContent=fmt(totalCarrito());
+  document.getElementById('modal-items').innerHTML=ids.map(id=>{
+    const p=getProd(id),q=carrito[id];
+    return `<div class="modal-row"><span>${p.emoji} ${p.nombre} ×${q}</span><span>${fmt(p.precio*q)}</span></div>`;
+  }).join('');
+  document.getElementById('modal').hidden=false;
+}
+function cerrarModal(){ document.getElementById('modal').hidden=true; }
+
+function confirmarCobro(){
+  const ids=Object.keys(carrito); if(!ids.length) return;
+  const total=totalCarrito();
+  const desc=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `${p.emoji}${p.nombre}${q>1?' ×'+q:''}`; }).join(', ');
+  historial.unshift({num:ventaNum++,desc,total});
+  try{ localStorage.setItem('caja_hist',JSON.stringify(historial)); }catch(e){}
+  limpiarCarrito(); cerrarModal(); setTab('historial');
+  setTimeout(()=>setTab(CATEGORIAS[0].id),1800);
+}
+
+function imprimirTicket(){
+  const ids=Object.keys(carrito); if(!ids.length) return;
+  const now=new Date();
+  document.getElementById('tk-logo').textContent=EVENTO.nombre;
+  document.getElementById('tk-num').textContent='Venta #'+ventaNum;
+  document.getElementById('tk-fecha').textContent=now.toLocaleDateString('es-CL',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'})+' '+now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('tk-total').textContent=fmt(totalCarrito());
+  document.getElementById('tk-items').innerHTML=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `<tr><td>${p.emoji} ${p.nombre}${q>1?' ×'+q:''}</td><td class="td-price">${fmt(p.precio*q)}</td></tr>`; }).join('');
+  window.print();
+}
+
+// HISTORIAL
+function renderHistorial(){
+  const sec=document.getElementById('tab-historial');
+  if(!historial.length){ sec.innerHTML='<div class="cart-empty" style="padding:24px;text-align:center">Sin ventas aún 🎵</div>'; return; }
+  const totalAcum=historial.reduce((a,v)=>a+v.total,0);
+  sec.innerHTML=`<div class="hist-title"><span>Ventas (${historial.length})</span><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div>
+    <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-monto">${fmt(totalAcum)}</span></div>
+    ${historial.map(v=>`<div class="hist-item"><span class="hi-num">#${v.num}</span><span class="hi-desc">${v.desc}</span><span class="hi-monto">${fmt(v.total)}</span></div>`).join('')}`;
+  document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem('caja_hist');}catch(e){} renderHistorial(); };
+}
+
+// INIT
+document.getElementById('event-name').textContent=EVENTO.nombre;
+renderTabs(); renderGrids(); renderCarrito();
+document.getElementById('btn-cobrar').onclick=abrirModal;
+document.getElementById('btn-limpiar').onclick=limpiarCarrito;
+document.getElementById('btn-confirmar').onclick=confirmarCobro;
+document.getElementById('btn-imprimir').onclick=imprimirTicket;
+document.getElementById('btn-volver').onclick=cerrarModal;
+document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')) cerrarModal(); };
+</script>
 </body>
 </html>
