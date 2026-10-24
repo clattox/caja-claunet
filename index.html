@@ -57,8 +57,25 @@
     <div class="modal-total" id="modal-total"></div>
     <div class="modal-items" id="modal-items"></div>
     <button class="modal-btn-ok" onclick="confirmarCobro()">💵 Cobrado — Nueva venta</button>
+    <button class="modal-btn-print" onclick="imprimirTicket()">🖨️ Imprimir ticket</button>
     <button class="modal-btn-cancel" onclick="cerrarModal()">← Volver al pedido</button>
   </div>
+</div>
+
+<!-- TICKET DE IMPRESIÓN (oculto en pantalla, visible solo al imprimir) -->
+<div id="ticket-print">
+  <div class="tk-logo" id="tk-logo"></div>
+  <div class="tk-meta">
+    <span id="tk-num"></span>
+    <span id="tk-fecha"></span>
+  </div>
+  <table class="tk-items" id="tk-items"></table>
+  <hr class="tk-sep">
+  <div class="tk-total">
+    <span>TOTAL</span>
+    <span id="tk-total"></span>
+  </div>
+  <div class="tk-footer">¡Gracias! 🎉<br>ClauNet · caja.claunet.cl</div>
 </div>
 
 <script src="config.js"></script>

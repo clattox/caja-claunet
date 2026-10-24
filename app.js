@@ -208,6 +208,33 @@ function renderHistorial() {
   `;
 }
 
+// --- Impresión térmica ---
+function imprimirTicket() {
+  const ids = Object.keys(carrito);
+  if (ids.length === 0) return;
+  const total = totalCarrito();
+  const now = new Date();
+  const fecha = now.toLocaleDateString('es-CL', { weekday:'short', day:'2-digit', month:'2-digit', year:'numeric' });
+  const hora  = now.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+
+  document.getElementById('tk-logo').textContent = EVENTO.nombre;
+  document.getElementById('tk-num').textContent  = 'Venta #' + ventaNum;
+  document.getElementById('tk-fecha').textContent = fecha + ' · ' + hora;
+  document.getElementById('tk-total').textContent = fmt(total);
+
+  let rows = '';
+  ids.forEach(id => {
+    const p = getProd(id); const qty = carrito[id];
+    rows += `<tr>
+      <td>${p.emoji} ${p.nombre}${qty > 1 ? ' ×' + qty : ''}</td>
+      <td class="td-price">${fmt(p.precio * qty)}</td>
+    </tr>`;
+  });
+  document.getElementById('tk-items').innerHTML = rows;
+
+  window.print();
+}
+
 function borrarHistorial() {
   historial = [];
   ventaNum = 1;
