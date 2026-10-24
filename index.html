@@ -6,7 +6,7 @@
   <title>Caja Beneficio — ClauNet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -50,15 +50,15 @@
 </div>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="modal" hidden onclick="cerrarModal(event)">
-  <div class="modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="modal" hidden>
+  <div class="modal">
     <div class="modal-emoji">🎉</div>
     <div class="modal-title">¡A cobrar!</div>
     <div class="modal-total" id="modal-total"></div>
     <div class="modal-items" id="modal-items"></div>
-    <button class="modal-btn-ok" onclick="confirmarCobro()">💵 Cobrado — Nueva venta</button>
-    <button class="modal-btn-print" onclick="imprimirTicket()">🖨️ Imprimir ticket</button>
-    <button class="modal-btn-cancel" onclick="cerrarModalForzado()">← Volver al pedido</button>
+    <button class="modal-btn-ok" id="btn-confirmar">💵 Cobrado — Nueva venta</button>
+    <button class="modal-btn-print" id="btn-imprimir">🖨️ Imprimir ticket</button>
+    <button class="modal-btn-cancel" id="btn-volver">← Volver al pedido</button>
   </div>
 </div>
 
@@ -78,7 +78,7 @@
   <div class="tk-footer">¡Gracias! 🎉<br>ClauNet · caja.claunet.cl</div>
 </div>
 
-<script src="config.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="config.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

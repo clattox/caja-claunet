@@ -19,6 +19,15 @@ function init() {
   renderTabs();
   renderGrids();
   renderCarrito();
+  // Eventos del modal por addEventListener (evita problemas de propagación)
+  document.getElementById('btn-confirmar').addEventListener('click', confirmarCobro);
+  document.getElementById('btn-imprimir').addEventListener('click', imprimirTicket);
+  document.getElementById('btn-volver').addEventListener('click', function() {
+    document.getElementById('modal').hidden = true;
+  });
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) this.hidden = true;
+  });
 }
 
 // --- Tabs ---
