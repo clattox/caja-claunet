@@ -13,21 +13,14 @@ try {
   ventaNum = stored.length + 1;
 } catch(e) {}
 
-// --- Init ---
-function init() {
-  document.getElementById('event-name').textContent = EVENTO.nombre;
-  renderTabs();
-  renderGrids();
-  renderCarrito();
-  // Eventos del modal por addEventListener (evita problemas de propagación)
-  document.getElementById('btn-confirmar').addEventListener('click', confirmarCobro);
-  document.getElementById('btn-imprimir').addEventListener('click', imprimirTicket);
-  document.getElementById('btn-volver').addEventListener('click', function() {
-    document.getElementById('modal').hidden = true;
-  });
-  document.getElementById('modal').addEventListener('click', function(e) {
-    if (e.target === this) this.hidden = true;
-  });
+// --- Helpers ---
+function fmt(n) { return '$' + n.toLocaleString('es-CL'); }
+
+function getProd(id) {
+  for (const cat of CATEGORIAS) {
+    const p = cat.productos.find(x => x.id === id);
+    if (p) return p;
+  }
 }
 
 // --- Tabs ---
@@ -36,8 +29,11 @@ function renderTabs() {
   const allTabs = [...CATEGORIAS.map(c => ({ id: c.id, label: c.label })),
                    { id: 'historial', label: '📋 Historial' }];
   container.innerHTML = allTabs.map(t =>
-    `<button class="tab ${t.id === tabActivo ? 'active' : ''}" onclick="setTab('${t.id}')">${t.label}</button>`
+    `<button class="tab ${t.id === tabActivo ? 'active' : ''}" data-tab="${t.id}">${t.label}</button>`
   ).join('');
+  container.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => setTab(btn.dataset.tab));
+  });
 }
 
 function setTab(id) {
@@ -56,7 +52,7 @@ function renderGrids() {
     <div id="tab-${cat.id}" class="tab-content" ${i !== 0 ? 'hidden' : ''}>
       <div class="grid" id="grid-${cat.id}">
         ${cat.productos.map(p => `
-          <button class="btn-product" id="btn-${p.id}" onclick="agregar('${p.id}')">
+          <button class="btn-product" id="btn-${p.id}" data-id="${p.id}">
             <span class="emoji">${p.emoji}</span>
             <span class="prod-name">${p.nombre}</span>
             <span class="prod-price">${fmt(p.precio)}</span>
@@ -65,16 +61,10 @@ function renderGrids() {
       </div>
     </div>
   `).join('') + `<div id="tab-historial" class="tab-content" hidden></div>`;
-}
 
-// --- Helpers ---
-function fmt(n) { return '$' + n.toLocaleString('es-CL'); }
-
-function getProd(id) {
-  for (const cat of CATEGORIAS) {
-    const p = cat.productos.find(x => x.id === id);
-    if (p) return p;
-  }
+  container.querySelectorAll('.btn-product').forEach(btn => {
+    btn.addEventListener('click', () => agregar(btn.dataset.id));
+  });
 }
 
 // --- Carrito ---
@@ -113,19 +103,17 @@ function renderCarrito() {
   const ids = Object.keys(carrito);
   const body = document.getElementById('cart-body');
   const countEl = document.getElementById('cart-count');
+  const btnCobrar = document.getElementById('btn-cobrar');
 
   if (ids.length === 0) {
     body.innerHTML = '<div class="cart-empty">Toca un producto para agregar ☝️</div>';
     countEl.textContent = '';
     document.getElementById('total-display').textContent = '$0';
-    const btnC = document.getElementById('btn-cobrar');
-    if (btnC) btnC.disabled = true;
+    if (btnCobrar) btnCobrar.disabled = true;
     return;
   }
 
-  let total = 0;
-  let itemCount = 0;
-  let html = '';
+  let total = 0, itemCount = 0, html = '';
   ids.forEach(id => {
     const p = getProd(id);
     const qty = carrito[id];
@@ -137,17 +125,19 @@ function renderCarrito() {
         <span style="font-size:1.2rem">${p.emoji}</span>
         <span class="cart-item-name">${p.nombre}</span>
         <div class="cart-qty-ctrl">
-          <button class="qty-btn" onclick="cambiarQty('${id}',-1)">−</button>
+          <button class="qty-btn" data-id="${id}" data-delta="-1">−</button>
           <span class="qty-num">${qty}</span>
-          <button class="qty-btn" onclick="cambiarQty('${id}',1)">+</button>
+          <button class="qty-btn" data-id="${id}" data-delta="1">+</button>
         </div>
         <span class="cart-item-total">${fmt(sub)}</span>
       </div>`;
   });
   body.innerHTML = html;
+  body.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', () => cambiarQty(btn.dataset.id, parseInt(btn.dataset.delta)));
+  });
   countEl.textContent = itemCount + ' ítem' + (itemCount !== 1 ? 's' : '');
   document.getElementById('total-display').textContent = fmt(total);
-  const btnCobrar = document.getElementById('btn-cobrar');
   if (btnCobrar) btnCobrar.disabled = false;
 }
 
@@ -174,12 +164,7 @@ function abrirModal() {
   document.getElementById('modal').hidden = false;
 }
 
-function cerrarModal(e) {
-  if (!e || e.target === document.getElementById('modal'))
-    document.getElementById('modal').hidden = true;
-}
-
-function cerrarModalForzado() {
+function cerrarModal() {
   document.getElementById('modal').hidden = true;
 }
 
@@ -194,35 +179,9 @@ function confirmarCobro() {
   historial.unshift({ num: ventaNum++, desc, total });
   try { localStorage.setItem('caja_hist', JSON.stringify(historial)); } catch(e) {}
   limpiarCarrito();
-  document.getElementById('modal').hidden = true;
+  cerrarModal();
   setTab('historial');
   setTimeout(() => setTab(CATEGORIAS[0].id), 1800);
-}
-
-// --- Historial ---
-function renderHistorial() {
-  const sec = document.getElementById('tab-historial');
-  if (historial.length === 0) {
-    sec.innerHTML = '<div class="cart-empty" style="padding:24px;text-align:center;color:var(--fg2)">Sin ventas aún 🎵</div>';
-    return;
-  }
-  const totalAcum = historial.reduce((a, v) => a + v.total, 0);
-  sec.innerHTML = `
-    <div class="historial-title">
-      <span>Ventas de hoy (${historial.length})</span>
-      <button class="btn-clear-hist" onclick="borrarHistorial()">Borrar todo</button>
-    </div>
-    <div class="total-acumulado">
-      <span class="ta-label">💰 Total recaudado</span>
-      <span class="ta-monto">${fmt(totalAcum)}</span>
-    </div>
-    ${historial.map(v => `
-      <div class="historial-item">
-        <span class="historial-num">#${v.num}</span>
-        <span class="historial-desc">${v.desc}</span>
-        <span class="historial-monto">${fmt(v.total)}</span>
-      </div>`).join('')}
-  `;
 }
 
 // --- Impresión térmica ---
@@ -248,8 +207,34 @@ function imprimirTicket() {
     </tr>`;
   });
   document.getElementById('tk-items').innerHTML = rows;
-
   window.print();
+}
+
+// --- Historial ---
+function renderHistorial() {
+  const sec = document.getElementById('tab-historial');
+  if (historial.length === 0) {
+    sec.innerHTML = '<div class="cart-empty" style="padding:24px;text-align:center;color:var(--fg2)">Sin ventas aún 🎵</div>';
+    return;
+  }
+  const totalAcum = historial.reduce((a, v) => a + v.total, 0);
+  sec.innerHTML = `
+    <div class="historial-title">
+      <span>Ventas de hoy (${historial.length})</span>
+      <button class="btn-clear-hist" id="btn-borrar-hist">Borrar todo</button>
+    </div>
+    <div class="total-acumulado">
+      <span class="ta-label">💰 Total recaudado</span>
+      <span class="ta-monto">${fmt(totalAcum)}</span>
+    </div>
+    ${historial.map(v => `
+      <div class="historial-item">
+        <span class="historial-num">#${v.num}</span>
+        <span class="historial-desc">${v.desc}</span>
+        <span class="historial-monto">${fmt(v.total)}</span>
+      </div>`).join('')}
+  `;
+  document.getElementById('btn-borrar-hist').addEventListener('click', borrarHistorial);
 }
 
 function borrarHistorial() {
@@ -257,6 +242,23 @@ function borrarHistorial() {
   ventaNum = 1;
   try { localStorage.removeItem('caja_hist'); } catch(e) {}
   renderHistorial();
+}
+
+// --- Init ---
+function init() {
+  document.getElementById('event-name').textContent = EVENTO.nombre;
+  renderTabs();
+  renderGrids();
+  renderCarrito();
+
+  document.getElementById('btn-cobrar').addEventListener('click', abrirModal);
+  document.getElementById('btn-limpiar').addEventListener('click', limpiarCarrito);
+  document.getElementById('btn-confirmar').addEventListener('click', confirmarCobro);
+  document.getElementById('btn-imprimir').addEventListener('click', imprimirTicket);
+  document.getElementById('btn-volver').addEventListener('click', cerrarModal);
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
 }
 
 init();
