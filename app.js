@@ -170,6 +170,10 @@ function cerrarModal(e) {
     document.getElementById('modal').hidden = true;
 }
 
+function cerrarModalForzado() {
+  document.getElementById('modal').hidden = true;
+}
+
 function confirmarCobro() {
   const ids = Object.keys(carrito);
   if (ids.length === 0) return;
