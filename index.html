@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Caja Beneficio — ClauNet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-title" id="event-name">🎵 Beneficio</div>
+    <div class="header-sub">Caja Rápida · ClauNet</div>
+  </div>
+  <div class="total-display">
+    <div class="total-label">Total venta</div>
+    <div class="total-amount" id="total-display">$0</div>
+  </div>
+</div>
+
+<div id="app">
+
+<!-- TABS -->
+<div class="tabs" id="tabs-container"></div>
+
+<!-- GRIDS por categoría -->
+<div id="grids-container"></div>
+
+<!-- CARRITO -->
+<div id="cart-section" class="cart-section">
+  <div class="cart-header">
+    <span>🛒 Pedido actual</span>
+    <span id="cart-count" style="color:var(--accent)"></span>
+  </div>
+  <div id="cart-body">
+    <div class="cart-empty">Toca un producto para agregar ☝️</div>
+  </div>
+</div>
+
+<!-- ACCIONES -->
+<div class="actions">
+  <button class="btn-limpiar" onclick="limpiarCarrito()">🗑️ Limpiar</button>
+  <button class="btn-cobrar" onclick="abrirModal()">✅ Cobrar</button>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" hidden onclick="cerrarModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-emoji">🎉</div>
+    <div class="modal-title">¡A cobrar!</div>
+    <div class="modal-total" id="modal-total"></div>
+    <div class="modal-items" id="modal-items"></div>
+    <button class="modal-btn-ok" onclick="confirmarCobro()">💵 Cobrado — Nueva venta</button>
+    <button class="modal-btn-cancel" onclick="cerrarModal()">← Volver al pedido</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
