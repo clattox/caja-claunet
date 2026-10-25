@@ -1622,10 +1622,25 @@ function registrarVenta(pago){
   const total=totalCarrito();
   const now=new Date();
   const hora=now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-  const items=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return {emoji:p.emoji,nombre:p.nombre,qty:q,precio:p.precio,sub:p.precio*q}; });
+  const items=ids.map(id=>{
+    const p=getProd(id), q=carrito[id];
+    const cat=cfg?.categorias?.find(c=>(c.productos||[]).some(x=>x.id===id));
+    return {emoji:p.emoji, nombre:p.nombre, qty:q, precio:p.precio, sub:p.precio*q, cocina:!!(cat&&cat.cocina)};
+  });
   const desc=items.map(i=>`${i.emoji}${i.nombre}${i.qty>1?' ×'+i.qty:''}`).join(', ');
   historial.unshift({num:ventaNum++,desc,total,hora,pago,items});
   try{ localStorage.setItem(LS_HIST,JSON.stringify(historial)); }catch(e){}
+  // Si hay items de cocina, mandar a Supabase en estado confirmado (ya cobrado)
+  const itemsCocina = items.filter(i=>i.cocina);
+  if(itemsCocina.length && _sb && _eventoActual){
+    _sb.from('pedidos').insert({
+      evento: _eventoActual,
+      nombre_cliente: 'Caja',
+      items,
+      total,
+      estado: 'confirmado'
+    }).then(({error})=>{ if(error) console.warn('[caja] error enviando a cocina:', error.message); });
+  }
   carrito={}; renderCarrito(); renderBadges();
   document.getElementById('modal').hidden=true;
   setTab('historial');
