@@ -781,14 +781,23 @@ body{
         </div>
       </div>
       <div id="pedidos-lista"><div class="pedidos-vacio">Esperando pedidos… 👀</div></div>
-      <div style="display:flex;gap:12px;padding:10px 2px 4px;flex-wrap:wrap">
-        <div style="text-align:center">
-          <div style="font-size:.68rem;color:var(--fg2);font-weight:700;margin-bottom:4px">📱 Clientes</div>
-          <div id="caja-qr-menu" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:.68rem;color:var(--fg2);font-weight:700;margin-bottom:4px">🍳 Cocina</div>
-          <div id="caja-qr-cocina" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+      <div style="margin-top:14px;border-top:1px solid var(--bdr);padding-top:12px">
+        <div style="font-size:.72rem;color:var(--fg2);font-weight:700;margin-bottom:10px">🔗 Accesos rápidos</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:8px 10px;border:1px solid var(--bdr)">
+            <div id="caja-qr-menu" style="width:90px;height:90px;min-width:90px;border-radius:6px;overflow:hidden;background:#fff"></div>
+            <div>
+              <div style="font-size:.8rem;font-weight:900;color:var(--fg)">📱 Menú clientes</div>
+              <div style="font-size:.72rem;color:var(--fg2);margin-top:2px">Clientes escanean para pedir</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:8px 10px;border:2px solid var(--grn)">
+            <div id="caja-qr-cocina" style="width:90px;height:90px;min-width:90px;border-radius:6px;overflow:hidden;background:#fff"></div>
+            <div>
+              <div style="font-size:.8rem;font-weight:900;color:var(--grn)">🍳 Vista cocina</div>
+              <div style="font-size:.72rem;color:var(--fg2);margin-top:2px">Para la pantalla de la cocina</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1821,8 +1830,8 @@ function dibujarQR(){
   // QRs en tab pedidos de la caja
   const elCM = document.getElementById('caja-qr-menu');
   const elCC = document.getElementById('caja-qr-cocina');
-  if(elCM){ elCM.innerHTML=''; try{ new QRCode(elCM,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,width:80,height:80,colorDark:'#0a1628',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
-  if(elCC){ elCC.innerHTML=''; try{ new QRCode(elCC,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=cocina`,width:80,height:80,colorDark:'#1a3a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  if(elCM){ elCM.innerHTML=''; try{ new QRCode(elCM,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,width:90,height:90,colorDark:'#0a1628',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  if(elCC){ elCC.innerHTML=''; try{ new QRCode(elCC,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=cocina`,width:90,height:90,colorDark:'#1a3a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
 }
 
 // ═══════════════════════════════════════
@@ -1888,7 +1897,7 @@ async function sbActualizar(){
 function renderPedidos(){
   const el = document.getElementById('pedidos-lista');
   if(!el) return;
-  const pendientes = _pedidos.filter(p => p.estado === 'pendiente');
+  const pendientes = _pedidos.filter(p => ['pendiente','confirmado'].includes(p.estado));
   if(!pendientes.length){
     el.innerHTML = '<div class="pedidos-vacio">Sin pedidos pendientes 🎉</div>';
     return;
@@ -1908,11 +1917,17 @@ function renderPedidos(){
       </div>
       <div class="pedido-items">${itemsHtml}</div>
       <div class="pedido-total">${fmt(p.total)}</div>
+      ${p.estado === 'pendiente' ? `
       <div class="pedido-acciones">
         <button class="btn-confirmar" onclick="sbConfirmar('${p.id}')">✅ Confirmar y cobrar</button>
         <button class="btn-rechazar" onclick="sbRechazar('${p.id}')">✕</button>
-      </div>
-      ${(p.items||[]).some(i=>i.cocina) ? `<button onclick="sbMandarCocina('${p.id}')" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:8px;background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer">🍳 Mandar a cocina</button>` : ''}
+      </div>` : `
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <div style="flex:1;padding:7px 10px;border-radius:8px;background:color-mix(in srgb,var(--grn) 12%,var(--sur));color:var(--grn);font-size:.78rem;font-weight:800;text-align:center">✅ Cobrado · en preparación</div>
+        <button onclick="sbMarcarListo('${p.id}')" style="padding:7px 12px;border:none;border-radius:8px;background:var(--yel);color:#1a1008;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer">🔔 Listo</button>
+        <button onclick="sbRechazar('${p.id}')" style="padding:7px 10px;border:none;border-radius:8px;background:var(--sur);color:var(--fg2);font-size:.78rem;cursor:pointer">✕</button>
+      </div>`}
+      ${p.estado === 'pendiente' && (p.items||[]).some(i=>i.cocina) ? `<button onclick="sbMandarCocina('${p.id}')" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:8px;background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer">🍳 Mandar a cocina</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -1962,16 +1977,21 @@ async function sbConfirmar(id){
   if(!_sb) return;
   await _sb.from('pedidos').update({estado:'confirmado'}).eq('id',id);
   _pedidos = _pedidos.map(p => p.id===id ? {...p, estado:'confirmado'} : p);
-  renderPedidos();
-  actualizarBadgePedidos();
+  renderPedidos(); actualizarBadgePedidos();
+}
+
+async function sbMarcarListo(id){
+  if(!_sb) return;
+  await _sb.from('pedidos').update({estado:'listo'}).eq('id',id);
+  _pedidos = _pedidos.map(p => p.id===id ? {...p, estado:'listo'} : p);
+  renderPedidos(); actualizarBadgePedidos();
 }
 
 async function sbRechazar(id){
   if(!_sb || !confirm('¿Rechazar este pedido?')) return;
   await _sb.from('pedidos').update({estado:'rechazado'}).eq('id',id);
-  _pedidos = _pedidos.map(p => p.id===id ? {...p, estado:'rechazado'} : p);
-  renderPedidos();
-  actualizarBadgePedidos();
+  _pedidos = _pedidos.filter(p => p.id!==id);
+  renderPedidos(); actualizarBadgePedidos();
 }
 
 // ── Vista cliente (menú QR) ──
@@ -2034,6 +2054,9 @@ function renderMenuResumen(){
   btn.onclick = () => sbEnviarPedido(items, total);
 }
 
+let _menuPedidoId = null;
+let _menuChannel  = null;
+
 async function sbEnviarPedido(items, total){
   if(!_sb){ alert('Sin conexión con el servidor'); return; }
   const nombre = document.getElementById('menu-nombre').value.trim() || 'Anónimo';
@@ -2041,22 +2064,47 @@ async function sbEnviarPedido(items, total){
   btn.disabled = true;
   btn.textContent = '⏳ Enviando…';
   const eventoParam = new URLSearchParams(location.search).get('evento') || 'evento';
-  const {error} = await _sb.from('pedidos').insert({
+  const {data, error} = await _sb.from('pedidos').insert({
     evento: eventoParam,
     nombre_cliente: nombre,
     items,
     total,
     estado: 'pendiente'
-  });
+  }).select('id').single();
   if(error){
     btn.disabled = false;
     btn.textContent = '✉️ Enviar pedido';
     alert('Error al enviar: ' + error.message);
     return;
   }
+  _menuPedidoId = data.id;
+  mostrarEstadoCliente('pendiente', nombre);
+  // Escuchar cambios de estado en tiempo real
+  if(_menuChannel) _sb.removeChannel(_menuChannel);
+  _menuChannel = _sb.channel('menu-pedido-'+_menuPedidoId)
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:`id=eq.${_menuPedidoId}`},
+      payload => { mostrarEstadoCliente(payload.new.estado, nombre); })
+    .subscribe();
+}
+
+function mostrarEstadoCliente(estado, nombre){
   document.getElementById('menu-form').hidden = true;
   document.getElementById('menu-estado-ok').hidden = false;
-  document.getElementById('menu-estado-txt').textContent = `Pedido de ${nombre} recibido. ¡Ya lo estamos preparando!`;
+  const estados = {
+    pendiente: { icon:'⏳', titulo:'Pedido recibido', msg:'Esperando confirmación de caja…', color:'var(--fg2)' },
+    confirmado: { icon:'✅', titulo:'¡Confirmado!', msg:'Tu pedido está siendo preparado 🍳', color:'var(--grn)' },
+    listo:      { icon:'🔔', titulo:'¡Listo para retirar!', msg:'Acércate a buscar tu pedido 🎉', color:'var(--yel)' },
+    rechazado:  { icon:'❌', titulo:'Pedido rechazado', msg:'Consulta en la caja.', color:'#e53' },
+  };
+  const e = estados[estado] || estados.pendiente;
+  document.getElementById('menu-estado-ok').innerHTML = `
+    <div style="text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="font-size:4rem;line-height:1">${e.icon}</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:${e.color}">${e.titulo}</div>
+      <div style="font-size:.92rem;color:var(--fg2);font-weight:700">${e.msg}</div>
+      <div style="font-size:.82rem;color:var(--fg2);opacity:.7">👤 ${nombre}</div>
+      ${estado==='listo'||estado==='rechazado'||estado==='entregado' ? `<button onclick="menuReiniciar()" style="margin-top:10px;padding:12px 28px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">Nuevo pedido</button>` : ''}
+    </div>`;
 }
 
 function menuReiniciar(){
@@ -2079,13 +2127,21 @@ function iniciarModoCocina(eventoParam){
   // Realtime
   if(_cocinaChannel) _sb && _sb.removeChannel(_cocinaChannel);
   _cocinaChannel = _sb.channel('cocina-'+Date.now())
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos'},
       payload => {
         if(payload.new.evento !== _cocinaEvento) return;
         const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
         if(!tieneComida) return;
-        cocinaRender([payload.new, ...(_cocina_pedidos||[])]);
-        try{ navigator.vibrate && navigator.vibrate([300,100,300]); }catch(e){}
+        if(payload.new.estado === 'confirmado'){
+          // nuevo pedido confirmado → agregar a la lista
+          _cocina_pedidos = [payload.new, ..._cocina_pedidos.filter(p=>p.id!==payload.new.id)];
+          cocinaRender(_cocina_pedidos);
+          try{ navigator.vibrate && navigator.vibrate([300,100,300]); }catch(e){}
+        } else {
+          // ya no es confirmado → sacarlo
+          _cocina_pedidos = _cocina_pedidos.filter(p=>p.id!==payload.new.id);
+          cocinaRender(_cocina_pedidos);
+        }
       })
     .subscribe(status => {
       const el = document.getElementById('cocina-conn');
@@ -2098,7 +2154,7 @@ let _cocina_pedidos = [];
 async function cocinaActualizar(){
   if(!_sb || !_cocinaEvento) return;
   const {data} = await _sb.from('pedidos').select('*')
-    .eq('evento',_cocinaEvento).eq('estado','pendiente')
+    .eq('evento',_cocinaEvento).in('estado',['confirmado'])
     .order('created_at',{ascending:true});
   if(data){
     _cocina_pedidos = data.filter(p=>(p.items||[]).some(i=>i.cocina));
@@ -2133,14 +2189,11 @@ function cocinaRender(pedidos){
 }
 
 function cocinaListo(id){
-  _cocina_listos.add(id);
-  // Actualizar UI inmediatamente
   const card = document.getElementById('cc-'+id);
-  if(card){ card.classList.add('listo'); card.querySelector('.btn-cocina-listo').disabled=true; card.querySelector('.btn-cocina-listo').textContent='✅ Entregado'; }
-  // Marcar en Supabase como confirmado
-  _sb && _sb.from('pedidos').update({estado:'confirmado'}).eq('id',id).then(()=>{
+  if(card){ card.classList.add('listo'); card.querySelector('.btn-cocina-listo').disabled=true; card.querySelector('.btn-cocina-listo').textContent='🔔 Avisando al cliente…'; }
+  _sb && _sb.from('pedidos').update({estado:'listo'}).eq('id',id).then(()=>{
     _cocina_pedidos = _cocina_pedidos.filter(p=>p.id!==id);
-    setTimeout(()=>{ const c=document.getElementById('cc-'+id); if(c) c.style.display='none'; }, 2000);
+    setTimeout(()=>{ const c=document.getElementById('cc-'+id); if(c) c.style.display='none'; }, 2500);
   });
 }
 
