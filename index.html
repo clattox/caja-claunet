@@ -404,6 +404,9 @@ button:active:not(:disabled){transform:scale(.98)}
 .hitem{padding:13px 14px;border-radius:13px}
 @keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 
+/* Bingo: columna centrada, nunca hereda grid de caja */
+#v-bingo .content{display:flex!important;flex-direction:column;max-width:520px;margin:0 auto;width:100%}
+
 /* En escritorio, productos y pedido comparten el espacio disponible. */
 @media(min-width:900px){
   #v-caja .content{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,350px);grid-template-areas:"tabs tabs" "products cart" "products actions";column-gap:clamp(18px,2vw,30px);row-gap:0;align-content:start;align-items:start}
@@ -510,7 +513,7 @@ body{
     </div>
     <button class="hdr-btn" id="bingo-volver">← Salir</button>
   </div>
-  <div class="content" style="max-width:480px">
+  <div class="content">
     <!-- Ronda activa -->
     <div class="card" style="margin-top:16px">
       <div style="font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Ronda actual</div>
