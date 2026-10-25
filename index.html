@@ -66,6 +66,10 @@ button{font-family:inherit;cursor:pointer}
 .btn-cobr{flex:2;padding:14px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;box-shadow:0 3px 12px rgba(42,157,92,.35)}
 .btn-cobr:disabled{background:var(--bdr);color:var(--fg2);box-shadow:none;cursor:default}
 
+/* ── TÍTULO CATEGORÍA ── */
+.cat-titulo{font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--fg2);padding:14px 2px 6px;border-bottom:2px solid var(--bdr);margin-bottom:8px}
+.cat-titulo:first-child{padding-top:6px}
+
 /* ── HISTORIAL ── */
 .hist-hdr{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.06em;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between}
 .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer}
@@ -411,8 +415,12 @@ body{
       <input type="date" id="adm-fecha">
     </div>
     <div class="form-group">
-      <label>PIN de acceso al admin (4 dígitos)</label>
+      <label>PIN admin (4 dígitos)</label>
       <input type="number" id="adm-pin" placeholder="1234" maxlength="4" style="max-width:140px">
+    </div>
+    <div class="form-group">
+      <label>PIN superadmin (4 dígitos) 🔒</label>
+      <input type="number" id="adm-spin" placeholder="••••" maxlength="4" style="max-width:140px">
     </div>
     <h2 style="margin-top:16px">Categorías y productos</h2>
     <button class="btn-add-cat" id="btn-cargar-evento" style="background:color-mix(in srgb,var(--yel) 15%,var(--sur));border-color:var(--yel);color:var(--fg);margin-bottom:6px">🎲 Cargar productos Bingo San Gerónimo</button>
@@ -608,9 +616,15 @@ let adminCfg = null; // copia editable
 
 function abrirAdmin(cancelable){
   adminCfg = cfg ? JSON.parse(JSON.stringify(cfg)) : { nombre:'', fecha: new Date().toISOString().slice(0,10), categorias:[] };
-  document.getElementById('adm-nombre').value = adminCfg.nombre || '';
-  document.getElementById('adm-fecha').value  = adminCfg.fecha  || '';
-  document.getElementById('adm-pin').value    = getPin();
+  document.getElementById('adm-nombre').value    = adminCfg.nombre || '';
+  document.getElementById('adm-fecha').value     = adminCfg.fecha  || '';
+  document.getElementById('adm-pin').value       = getPin();
+  // Solo superadmin puede cambiar nombre del evento y PINes
+  const esSuperAdmin = nivelAdmin === 2;
+  document.getElementById('adm-nombre').disabled = !esSuperAdmin;
+  document.getElementById('adm-pin').disabled    = !esSuperAdmin;
+  document.getElementById('adm-spin').disabled   = !esSuperAdmin;
+  document.getElementById('adm-spin').value      = esSuperAdmin ? getSPin() : '••••';
   document.getElementById('btn-admin-cancel').style.display = cancelable ? '' : 'none';
   renderAdminCats();
   showView('v-admin');
@@ -689,9 +703,13 @@ document.getElementById('btn-add-cat').onclick = () => {
 document.getElementById('btn-guardar').onclick = () => {
   const nombre = document.getElementById('adm-nombre').value.trim();
   const fecha  = document.getElementById('adm-fecha').value;
-  if(!nombre){ alert('Escribe el nombre del evento'); return; }
-  const pinVal = document.getElementById('adm-pin').value.trim();
-  if(pinVal && /^\d{4}$/.test(pinVal)) localStorage.setItem(LS_PIN, pinVal);
+  if(nivelAdmin === 2 && !nombre){ alert('Escribe el nombre del evento'); return; }
+  if(nivelAdmin === 2){
+    const pinVal  = document.getElementById('adm-pin').value.trim();
+    const spinVal = document.getElementById('adm-spin').value.trim();
+    if(pinVal  && /^\d{4}$/.test(pinVal))  localStorage.setItem(LS_PIN,  pinVal);
+    if(spinVal && /^\d{4}$/.test(spinVal)) localStorage.setItem(LS_SPIN, spinVal);
+  }
   // Snapshot labels from DOM antes de filtrar
   document.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
   adminCfg.nombre = nombre;
@@ -721,14 +739,18 @@ document.getElementById('btn-ir-admin2').onclick    = () => pedirPin();
 // ═══════════════════════════════════════
 //  PIN ADMIN
 // ═══════════════════════════════════════
-const LS_PIN = 'caja_pin';
-const PIN_DEFAULT = '1234';
+const LS_PIN  = 'caja_pin';
+const LS_SPIN = 'caja_spin';
+const PIN_DEFAULT  = '1234';
+const SPIN_DEFAULT = '9999';
 let pinBuffer = '';
+let nivelAdmin = 0; // 1=admin, 2=superadmin
 
-function getPin(){ return localStorage.getItem(LS_PIN) || PIN_DEFAULT; }
+function getPin() { return localStorage.getItem(LS_PIN)  || PIN_DEFAULT;  }
+function getSPin(){ return localStorage.getItem(LS_SPIN) || SPIN_DEFAULT; }
 
 function pedirPin(){
-  pinBuffer = '';
+  pinBuffer = ''; nivelAdmin = 0;
   actualizarDots();
   document.getElementById('pin-err').textContent = '';
   document.getElementById('pin-overlay').hidden = false;
@@ -746,7 +768,12 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
   actualizarDots();
   if(pinBuffer.length === 4){
     setTimeout(()=>{
-      if(pinBuffer === getPin()){
+      if(pinBuffer === getSPin()){
+        nivelAdmin = 2;
+        document.getElementById('pin-overlay').hidden = true;
+        abrirAdmin(true);
+      } else if(pinBuffer === getPin()){
+        nivelAdmin = 1;
         document.getElementById('pin-overlay').hidden = true;
         abrirAdmin(true);
       } else {
@@ -780,33 +807,38 @@ function abrirCaja(){
   showView('v-caja');
 }
 
-// TABS
+// TABS (solo Historial como tab)
 function renderTabs(){
   const cont = document.getElementById('caja-tabs');
   cont.innerHTML = '';
-  [...cfg.categorias.map(c=>({id:c.id,label:c.label})),{id:'historial',label:'📋 Historial'}].forEach(t=>{
-    const b = document.createElement('button');
-    b.className = 'tab-btn'+(t.id===tabActivo?' on':'');
-    b.textContent = t.label;
-    b.onclick = () => setTab(t.id);
-    cont.appendChild(b);
-  });
+  const b = document.createElement('button');
+  b.className = 'tab-btn'+(tabActivo==='historial'?'':' on');
+  b.textContent = '🛒 Productos';
+  b.onclick = () => setTab('productos');
+  cont.appendChild(b);
+  const h = document.createElement('button');
+  h.className = 'tab-btn'+(tabActivo==='historial'?' on':'');
+  h.textContent = '📋 Historial';
+  h.onclick = () => setTab('historial');
+  cont.appendChild(h);
 }
 function setTab(id){
   tabActivo = id; renderTabs();
-  document.querySelectorAll('.tab-content').forEach(el=>el.hidden=true);
-  const el = document.getElementById('tab-'+id);
-  if(el) el.hidden = false;
+  document.getElementById('caja-grids').hidden = (id==='historial');
+  const hist = document.getElementById('tab-historial');
+  hist.hidden = (id!=='historial');
   if(id==='historial') renderHistorial();
 }
 
-// GRIDS
+// GRIDS — todas las categorías visibles a la vez
 function renderGrids(){
   const cont = document.getElementById('caja-grids');
   cont.innerHTML = '';
-  cfg.categorias.forEach((cat,i)=>{
-    const wrap = document.createElement('div');
-    wrap.id = 'tab-'+cat.id; wrap.className='tab-content'; wrap.hidden=(i!==0);
+  cfg.categorias.forEach(cat=>{
+    const titulo = document.createElement('div');
+    titulo.className = 'cat-titulo';
+    titulo.textContent = cat.label;
+    cont.appendChild(titulo);
     const grid = document.createElement('div'); grid.className='grid';
     cat.productos.forEach(p=>{
       const btn = document.createElement('button');
@@ -815,9 +847,9 @@ function renderGrids(){
       btn.onclick=()=>agregar(p.id);
       grid.appendChild(btn);
     });
-    wrap.appendChild(grid); cont.appendChild(wrap);
+    cont.appendChild(grid);
   });
-  const h = document.createElement('div'); h.id='tab-historial'; h.className='tab-content'; h.hidden=true;
+  const h = document.createElement('div'); h.id='tab-historial'; h.hidden=true;
   cont.appendChild(h);
 }
 
