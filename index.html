@@ -1723,7 +1723,7 @@ function _saludoDinamico(){
 }
 
 function mostrarSelector(){
-  document.getElementById('sel-nombre').textContent  = cfg.nombre || '';
+  document.getElementById('sel-nombre').textContent  = 'CajaNet';
   document.getElementById('sel-saludo').textContent  = _saludoDinamico();
   showView('v-selector');
 }
@@ -1773,28 +1773,7 @@ function seleccionarEvento(id){
   document.getElementById('pin-overlay').hidden = false;
 }
 
-document.getElementById('sel-caja').onclick = () => {
-  // PIN de caja (el existente)
-  _pinAccion = null;
-  pinBuffer  = '';
-  nivelAdmin = 0;
-  document.getElementById('pin-overlay').querySelector('h3').textContent = '🛒 Acceso Caja';
-  document.getElementById('pin-overlay').querySelector('p').textContent  = 'Ingresa el PIN de cajera';
-  actualizarDots();
-  document.getElementById('pin-err').textContent = '';
-  _pinDestinoSelector = 'caja';
-  document.getElementById('pin-overlay').hidden = false;
-};
-
-document.getElementById('sel-bingo').onclick = () => {
-  pinBuffer  = '';
-  document.getElementById('pin-overlay').querySelector('h3').textContent = '🎱 Acceso Bingo';
-  document.getElementById('pin-overlay').querySelector('p').textContent  = 'Ingresa el PIN de bingo';
-  actualizarDots();
-  document.getElementById('pin-err').textContent = '';
-  _pinDestinoSelector = 'bingo';
-  document.getElementById('pin-overlay').hidden = false;
-};
+// sel-caja y sel-bingo ya no existen — reemplazados por cargarEventosSelector()
 
 document.getElementById('sel-admin').onclick = () => {
   _pinDestinoSelector = null;
