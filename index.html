@@ -150,7 +150,10 @@ button{font-family:inherit;cursor:pointer}
 .card-hdr span{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800}
 .prod-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .prod-row input{flex:1;padding:8px 10px;border-radius:8px;border:2px solid var(--bdr);background:var(--bg);color:var(--fg);font-family:'Nunito Sans',sans-serif;font-size:.85rem}
-.prod-row input.em-inp{width:54px;flex:none;text-align:center}
+.prod-row input.em-inp{width:54px;flex:none;text-align:center;cursor:pointer}
+.emoji-picker{position:absolute;z-index:300;background:var(--sur);border:1px solid var(--bdr);border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:flex;flex-wrap:wrap;gap:4px;width:232px;max-height:200px;overflow-y:auto}
+.emoji-picker button{background:none;border:none;font-size:1.5rem;cursor:pointer;padding:3px;border-radius:6px;line-height:1}
+.emoji-picker button:hover{background:var(--bg)}
 .prod-row input.pr-inp{width:90px;flex:none}
 .btn-del{background:none;border:none;color:var(--fg2);font-size:1.1rem;cursor:pointer;padding:4px}
 .btn-add{background:none;border:2px dashed var(--bdr);color:var(--fg2);border-radius:10px;padding:8px;width:100%;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;margin-top:4px}
@@ -781,7 +784,9 @@ function renderAdminProds(ci){
       </label>
       <input class="stk-inp" type="number" value="${tieneStock?p.stock:''}" placeholder="0" min="0" step="1" style="${tieneStock?'':'display:none'}">
       <button class="btn-del">✕</button>`;
-    row.querySelector('.em-inp').oninput     = e => { p.emoji  = e.target.value; };
+    const emInp = row.querySelector('.em-inp');
+    emInp.oninput  = e => { p.emoji = e.target.value; };
+    emInp.onclick  = e => { e.stopPropagation(); abrirEmojiPicker(emInp, p); };
     row.querySelectorAll('input')[1].oninput = e => { p.nombre = e.target.value; };
     row.querySelector('.pr-inp').oninput     = e => { p.precio = parseInt(e.target.value)||0; };
     const chk   = row.querySelector('.stk-chk');
@@ -1255,6 +1260,37 @@ function mostrarCierre(){
 document.getElementById('cierre-close').onclick  = ()=>{ document.getElementById('cierre-overlay').hidden=true; };
 document.getElementById('cierre-excel').onclick  = ()=>{ exportarExcel(); document.getElementById('cierre-overlay').hidden=true; };
 document.getElementById('cierre-overlay').onclick = e=>{ if(e.target===document.getElementById('cierre-overlay')) document.getElementById('cierre-overlay').hidden=true; };
+
+// ── EMOJI PICKER ─────────────────────────────────────────────────────────────
+const EMOJIS = [
+  '🍕','🍔','🌭','🍟','🌮','🌯','🥙','🥪','🫔','🥗','🍣','🍱','🍛','🍜','🍝',
+  '🍲','🥘','🫕','🥫','🍿','🧂','🧆','🥚','🍳','🥞','🧇','🥓','🥩','🍗','🍖',
+  '🦴','🌽','🥕','🫑','🥦','🥬','🥒','🍆','🥑','🧄','🧅','🥔','🍠','🫘','🥜',
+  '🍞','🥐','🥖','🫓','🥨','🧀','🥗','🧁','🎂','🍰','🍮','🍭','🍬','🍫','🍩',
+  '🍪','🍦','🍧','🍨','🍡','🍢','🍣','🍤','🥠','🥮','🍚','🍙','🍘','🍥',
+  '☕','🍵','🧋','🍺','🍻','🥂','🍷','🥃','🍸','🍹','🧃','🥤','🧊','🍶',
+  '🫗','🍾','🧉','🍼','🥛','🫖','🧴','🎉','⭐','💫','✨','🔥','💎','🎵'
+];
+let _pickerEl = null;
+function cerrarPicker(){ if(_pickerEl){ _pickerEl.remove(); _pickerEl=null; } }
+document.addEventListener('click', e => { if(_pickerEl && !_pickerEl.contains(e.target) && !e.target.classList.contains('em-inp')) cerrarPicker(); });
+
+function abrirEmojiPicker(inp, p){
+  cerrarPicker();
+  const picker = document.createElement('div');
+  picker.className = 'emoji-picker';
+  EMOJIS.forEach(em => {
+    const btn = document.createElement('button');
+    btn.textContent = em;
+    btn.type = 'button';
+    btn.onclick = () => { p.emoji = em; inp.value = em; cerrarPicker(); };
+    picker.appendChild(btn);
+  });
+  // posicionar bajo el input
+  inp.parentElement.style.position = 'relative';
+  inp.parentElement.appendChild(picker);
+  _pickerEl = picker;
+}
 
 // ── QR DEL LINK ──────────────────────────────────────────────────────────────
 // Micro QR usando qrcode-generator desde cdnjs
