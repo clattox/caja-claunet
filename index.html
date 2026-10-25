@@ -623,7 +623,7 @@ body{
   <div class="cocina-hdr">
     <span>🍳 Cocina</span>
     <span class="cocina-conn" id="cocina-conn">⚪ Conectando…</span>
-    <button onclick="cocinaActualizar()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer">🔄</button>
+    <button onclick="cocinaActualizar()" style="background:#fff;border:none;color:#1a3a1a;border-radius:10px;padding:8px 16px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.2)">🔄 Actualizar</button>
   </div>
   <div class="cocina-lista" id="cocina-lista">
     <div class="cocina-vacio">Esperando comandas… 🍽️</div>
@@ -2313,7 +2313,11 @@ async function iniciarModoCocina(eventoParam){
   if(!_sb){ sbInit(); }
   // Resolver slug → nombre del evento (los pedidos se guardan con el nombre)
   const slug = decodeURIComponent(eventoParam);
-  const {data: evData} = await _sb.from('eventos').select('nombre').eq('slug', slug).single();
+  const {data: evData} = await _sb.from('eventos').select('nombre,cocina_activa').eq('slug', slug).single();
+  if(evData && evData.cocina_activa === false){
+    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Nunito,sans-serif;text-align:center;padding:24px;gap:16px"><div style="font-size:3rem">🚫</div><div style="font-size:1.2rem;font-weight:900;color:#333">Cocina desactivada</div><div style="color:#666;font-size:.9rem">La cocina de este evento está desactivada por el organizador.</div></div>';
+    return;
+  }
   _cocinaEvento = evData ? evData.nombre : slug;
 
   // Actualizar título en el header de cocina si existe
@@ -2436,18 +2440,22 @@ sbInit();
     const slug = decodeURIComponent(eventoParam);
     console.log('[menu] buscando evento slug:', JSON.stringify(slug));
     // 1. Exacto por slug
-    let {data} = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina').eq('slug', slug).single();
+    let {data} = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina,menu_activo').eq('slug', slug).single();
     // 2. ilike por slug (tildes/mayúsculas)
     if(!data){
-      const r2 = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina').ilike('slug', slug).single();
+      const r2 = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina,menu_activo').ilike('slug', slug).single();
       data = r2.data;
     }
     // 3. ilike por nombre (por si el param es el nombre, no el slug)
     if(!data){
-      const r3 = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina').ilike('nombre', slug).single();
+      const r3 = await _sb.from('eventos').select('nombre,slug,categorias,pin_caja,pin_cocina,menu_activo').ilike('nombre', slug).single();
       data = r3.data;
     }
-    console.log('[menu] evento encontrado:', data?.nombre, '| cats:', data?.categorias?.length);
+    console.log('[menu] evento encontrado:', data?.nombre, '| cats:', data?.categorias?.length, '| menu_activo:', data?.menu_activo);
+    if(data && data.menu_activo === false){
+      document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:Nunito,sans-serif;text-align:center;padding:24px;gap:16px"><div style="font-size:3rem">🚫</div><div style="font-size:1.2rem;font-weight:900;color:#333">Menú no disponible</div><div style="color:#666;font-size:.9rem">El menú de este evento está desactivado por el organizador.</div></div>';
+      return;
+    }
     if(data){
       cfg = { nombre: data.nombre, slug: data.slug || slug, categorias: data.categorias || [], pinCaja: data.pin_caja, pinCocina: data.pin_cocina };
     }
@@ -2512,10 +2520,15 @@ async function saCargarEventos(){
         <button class="sa-btn ${ev.activo?'sa-btn-toggle-on':'sa-btn-toggle-off'}" onclick="saToggleActivo('${ev.id}',${ev.activo})">${ev.activo?'✓ Activo':'○ Inactivo'}</button>
         <button class="sa-btn sa-btn-del" onclick="saEliminarEvento('${ev.id}','${ev.nombre.replace(/'/g,"\\'")}')" title="Eliminar">🗑</button>
       </div>
-      ${slug ? `<div style="display:flex;gap:8px;margin-top:8px">
-        <a href="?evento=${encodeURIComponent(slug)}&modo=menu" target="_blank" style="flex:1;display:block;padding:7px;border-radius:8px;background:color-mix(in srgb,var(--acc) 15%,var(--sur));color:var(--acc);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;text-align:center;text-decoration:none">🧑‍💻 Abrir cliente</a>
-        <a href="?evento=${encodeURIComponent(slug)}&modo=cocina" target="_blank" style="flex:1;display:block;padding:7px;border-radius:8px;background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;text-align:center;text-decoration:none">🍳 Abrir cocina</a>
-      </div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="saToggleMenu('${ev.id}',${!!ev.menu_activo})" style="flex:1;padding:7px;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer;background:${ev.menu_activo!==false?'color-mix(in srgb,var(--acc) 20%,var(--sur))':'var(--sur)'};color:${ev.menu_activo!==false?'var(--acc)':'var(--fg2)'}">
+          🧑‍💻 Cliente ${ev.menu_activo!==false?'✓ ON':'✗ OFF'}
+        </button>
+        <button onclick="saToggleCocina('${ev.id}',${!!ev.cocina_activa})" style="flex:1;padding:7px;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer;background:${ev.cocina_activa!==false?'color-mix(in srgb,var(--grn) 20%,var(--sur))':'var(--sur)'};color:${ev.cocina_activa!==false?'var(--grn)':'var(--fg2)'}">
+          🍳 Cocina ${ev.cocina_activa!==false?'✓ ON':'✗ OFF'}
+        </button>
+        ${slug?`<a href="?evento=${encodeURIComponent(slug)}&modo=menu" target="_blank" title="Abrir cliente" style="display:flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:8px;background:var(--sur);color:var(--fg2);font-size:.85rem;text-decoration:none">↗</a>`:''}
+      </div>
     </div>`;
   }).join('');
 }
@@ -2638,6 +2651,14 @@ async function saGuardarEvento(){
 
 async function saToggleActivo(id, activo){
   await _sb.from('eventos').update({activo:!activo}).eq('id',id);
+  saCargarEventos();
+}
+async function saToggleCocina(id, cocina_activa){
+  await _sb.from('eventos').update({cocina_activa:!cocina_activa}).eq('id',id);
+  saCargarEventos();
+}
+async function saToggleMenu(id, menu_activo){
+  await _sb.from('eventos').update({menu_activo:!menu_activo}).eq('id',id);
   saCargarEventos();
 }
 
