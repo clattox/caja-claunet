@@ -566,10 +566,13 @@ body{
 
 <!-- VISTA BINGO -->
 <div class="view" id="v-bingo">
-  <div class="hdr" style="background:#1a6fb5">
-    <div class="hdr-left">
-      <h1>🎱 Bingo</h1>
-      <p id="bingo-nombre-hdr"></p>
+  <div class="hdr" style="background:linear-gradient(90deg,#1a6fb5 0%,#0d4a8a 100%)">
+    <div class="hdr-left" style="display:flex;align-items:center;gap:10px">
+      <img id="bingo-logo-hdr" src="" alt="" style="width:36px;height:auto;animation:sel-float 3s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))">
+      <div>
+        <h1>🎱 Bingo</h1>
+        <p id="bingo-nombre-hdr"></p>
+      </div>
     </div>
     <button class="hdr-btn" id="bingo-volver">← Salir</button>
   </div>
@@ -658,10 +661,13 @@ body{
 
 <!-- ══ VISTA: CAJA ══ -->
 <div class="view" id="v-caja">
-  <div class="hdr">
-    <div class="hdr-left">
-      <h1 id="caja-nombre">Caja</h1>
-      <p>Caja Rápida · ClauNet</p>
+  <div class="hdr" style="background:linear-gradient(90deg,#1a6fb5 0%,#0d4a8a 100%)">
+    <div class="hdr-left" style="display:flex;align-items:center;gap:10px">
+      <img id="caja-logo-hdr" src="" alt="" style="width:36px;height:auto;animation:sel-float 3s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))">
+      <div>
+        <h1 id="caja-nombre">Caja</h1>
+        <p>Caja Rápida · ClauNet</p>
+      </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <div class="hdr-right">
@@ -1449,8 +1455,14 @@ function exportarExcel(){
 }
 
 // ── SELECTOR (Bingo / Caja) ──────────────────────────────────────────────────
-// Logo base64 compartido entre intro y selector
+// Logo base64 compartido entre intro, selector y headers
 const _LOGO_SRC = document.querySelector('#v-intro .intro-logo img')?.src || '';
+// Inyectar logo en headers de caja y bingo
+['caja-logo-hdr','bingo-logo-hdr','sel-logo-img'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el && _LOGO_SRC) el.src = _LOGO_SRC;
+  else if(el) el.style.display = 'none';
+});
 
 function _saludoDinamico(){
   const h = new Date().getHours();
@@ -1462,9 +1474,6 @@ function _saludoDinamico(){
 function mostrarSelector(){
   document.getElementById('sel-nombre').textContent  = cfg.nombre || '';
   document.getElementById('sel-saludo').textContent  = _saludoDinamico();
-  const logoEl = document.getElementById('sel-logo-img');
-  if(_LOGO_SRC) logoEl.src = _LOGO_SRC;
-  else logoEl.style.display = 'none';
   showView('v-selector');
 }
 
