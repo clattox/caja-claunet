@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
 <style>
-:root{--bg:#f0f5ff;--sur:#fff;--fg:#0a1628;--fg2:#4a6080;--acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#d0e0f0;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
-@media(prefers-color-scheme:dark){:root{--bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;--bdr:#1a3050}}
+:root,[data-theme="light"]{--bg:#f0f5ff;--sur:#fff;--fg:#0a1628;--fg2:#4a6080;--acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#d0e0f0;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
+[data-theme="dark"]{--bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;--acc:#4a9fd5;--yel:#f7a800;--grn:#48c59b;--bdr:#1a3050;--sh:0 2px 10px rgba(0,0,0,.30)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100dvh}
 button{font-family:inherit;cursor:pointer}
@@ -227,17 +227,9 @@ button{font-family:inherit;cursor:pointer}
 }
 
 /* ══ REDISEÑO CAJA RÁPIDA 2.0 ══ */
-:root{
-  --bg:#f0f5ff;--sur:#fff;--fg:#0a1628;--fg2:#4a6080;
-  --acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#d0e0f0;
-  --r:16px;--sh:0 2px 8px rgba(10,22,40,.06);
-  --sh-hover:0 8px 22px rgba(10,22,40,.13);
-}
-@media(prefers-color-scheme:dark){:root{
-  --bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;
-  --acc:#4a9fd5;--yel:#f7a800;--grn:#48c59b;--bdr:#1a3050;
-  --sh:0 2px 8px rgba(0,0,0,.25);--sh-hover:0 8px 22px rgba(0,0,0,.38)
-}}
+/* colores ya definidos arriba — sin duplicados */
+:root{--sh-hover:0 8px 22px rgba(10,22,40,.13)}
+[data-theme="dark"]{--sh-hover:0 8px 22px rgba(0,0,0,.38)}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--fg);font-size:15px;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit}
@@ -359,15 +351,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 
 
 /* ══ CAJA RÁPIDA 2.0 · AJUSTES VISUALES ══ */
-:root{
-  color-scheme:light;
-  --bg:#FFF9F3;--sur:#FFFFFF;--fg:#292523;--fg2:#716760;
-  --acc:#EF6550;--yel:#FFC857;--grn:#218C74;--bdr:#EADFD5;
-  --r:14px;--sh:0 3px 12px rgba(55,35,20,.06);
-}
-@media(prefers-color-scheme:dark){
-  :root{color-scheme:dark;--bg:#191715;--sur:#282421;--fg:#F9F3EB;--fg2:#BDB0A6;--acc:#FF806A;--yel:#FFC857;--grn:#48C59B;--bdr:#423A34;--sh:0 3px 12px rgba(0,0,0,.18)}
-}
+/* colores ya definidos arriba — sin duplicados */
 html{min-height:100%;background:var(--bg)}
 body{background:var(--bg);color:var(--fg);line-height:1.45}
 button{min-height:44px;transition:transform .14s ease,background-color .14s ease,border-color .14s ease,box-shadow .14s ease}
@@ -574,7 +558,10 @@ body{
         <p id="bingo-nombre-hdr"></p>
       </div>
     </div>
-    <button class="hdr-btn" id="bingo-volver">← Salir</button>
+    <div style="display:flex;gap:8px">
+      <button class="hdr-btn" id="bingo-dark-toggle" title="Cambiar tema" style="background:rgba(255,255,255,.12);font-size:.72rem;padding:0 10px;line-height:1.2;min-width:80px"></button>
+      <button class="hdr-btn" id="bingo-volver" style="background:rgba(255,255,255,.12)">← Salir</button>
+    </div>
   </div>
   <div class="content">
     <!-- Ronda activa -->
@@ -675,6 +662,7 @@ body{
         <div class="amt" id="caja-total">$0</div>
       </div>
       <button class="hdr-btn" id="btn-salir-caja" style="background:rgba(255,255,255,.12)">← Salir</button>
+      <button class="hdr-btn" id="btn-dark-toggle" title="Cambiar tema" style="background:rgba(255,255,255,.12);font-size:.72rem;padding:0 10px;line-height:1.2;min-width:80px"></button>
       <button class="hdr-btn" id="btn-ir-admin2">⚙️</button>
     </div>
   </div>
@@ -1547,6 +1535,33 @@ document.getElementById('bingo-cerrar-ronda').onclick = () => {
   actualizarBingoUI();
   renderBingoHistorial();
 };
+
+/* ── Toggle dark/light ── */
+function _isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
+function _updateToggleBtns(){
+  const txt = _isDark() ? "👀 Pa' los que ven bien" : "😴 Pa' los que no duermen";
+  ['btn-dark-toggle','bingo-dark-toggle'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=txt;
+  });
+}
+function _toggleTheme(){
+  const next = _isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('claunet_theme', next); }catch(e){}
+  _updateToggleBtns();
+}
+// Inicializar desde localStorage
+(function(){
+  const saved = (() => { try{ return localStorage.getItem('claunet_theme'); }catch(e){ return null; } })();
+  document.documentElement.setAttribute('data-theme', saved || 'light');
+  // los botones se actualizan después del DOM ready
+})();
+['btn-dark-toggle','bingo-dark-toggle'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.onclick=_toggleTheme;
+});
+_updateToggleBtns();
 
 document.getElementById('bingo-volver').onclick = () => mostrarSelector();
 
