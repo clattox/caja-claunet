@@ -470,8 +470,13 @@ button:active:not(:disabled){transform:scale(.98)}
 .pedido-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .pedido-nombre{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;color:var(--fg)}
 .pedido-hora{font-size:.72rem;color:var(--fg2)}
-.pedido-items{font-size:.82rem;color:var(--fg2);margin-bottom:10px;line-height:1.6}
-.pedido-total{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--acc)}
+.pedido-items{margin-bottom:10px}
+.pedido-item-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);gap:8px}
+.pedido-item-row:last-child{border-bottom:none}
+.pedido-item-nm{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:800;color:var(--fg)}
+.pedido-item-qty{background:var(--acc);color:#fff;border-radius:6px;padding:1px 7px;font-size:.78rem;font-weight:900;flex-shrink:0}
+.pedido-item-sub{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--acc);flex-shrink:0}
+.pedido-total{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;color:var(--acc);text-align:right;padding-top:6px;border-top:2px solid var(--bdr);margin-top:4px}
 .pedido-acciones{display:flex;gap:8px;margin-top:10px}
 .btn-confirmar{flex:1;padding:8px;border-radius:8px;border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:900}
 .btn-rechazar{padding:8px 12px;border-radius:8px;border:2px solid var(--bdr);background:none;color:var(--fg2);font-size:.8rem;font-weight:800}
@@ -1826,13 +1831,18 @@ function renderPedidos(){
   }
   el.innerHTML = pendientes.map(p => {
     const hora = new Date(p.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    const items = (p.items||[]).map(i=>`${i.qty}× ${i.nombre}`).join(', ');
+    const itemsHtml = (p.items||[]).map(i=>`
+      <div class="pedido-item-row">
+        <span class="pedido-item-qty">${i.qty}×</span>
+        <span class="pedido-item-nm" style="flex:1">${i.nombre}</span>
+        <span class="pedido-item-sub">${fmt(i.sub||i.qty*(i.precio||0))}</span>
+      </div>`).join('');
     return `<div class="pedido-card nuevo" id="pc-${p.id}">
       <div class="pedido-card-hdr">
-        <span class="pedido-nombre">👤 ${p.nombre_cliente||'Sin nombre'} ${p.mesa?'· Mesa '+p.mesa:''}</span>
+        <span class="pedido-nombre">👤 ${p.nombre_cliente||'Sin nombre'}${p.mesa?' · Mesa '+p.mesa:''}</span>
         <span class="pedido-hora">${hora}</span>
       </div>
-      <div class="pedido-items">${items}</div>
+      <div class="pedido-items">${itemsHtml}</div>
       <div class="pedido-total">${fmt(p.total)}</div>
       <div class="pedido-acciones">
         <button class="btn-confirmar" onclick="sbConfirmar('${p.id}')">✅ Confirmar y cobrar</button>
