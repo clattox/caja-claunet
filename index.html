@@ -2306,8 +2306,6 @@ async function iniciarModoCocina(eventoParam){
       payload => {
         console.log('[cocina] INSERT recibido:', payload.new.evento, '| estado:', payload.new.estado);
         if(!_matchEvento(payload.new.evento)) return;
-        const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
-        if(!tieneComida) return;
         if(['pendiente','confirmado'].includes(payload.new.estado)){
           _cocina_pedidos = [payload.new, ..._cocina_pedidos.filter(p=>p.id!==payload.new.id)];
           cocinaRender(_cocina_pedidos);
@@ -2318,8 +2316,6 @@ async function iniciarModoCocina(eventoParam){
       payload => {
         console.log('[cocina] UPDATE recibido:', payload.new.evento, '| estado:', payload.new.estado);
         if(!_matchEvento(payload.new.evento)) return;
-        const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
-        if(!tieneComida) return;
         if(['pendiente','confirmado'].includes(payload.new.estado)){
           _cocina_pedidos = [payload.new, ..._cocina_pedidos.filter(p=>p.id!==payload.new.id)];
           cocinaRender(_cocina_pedidos);
@@ -2348,8 +2344,9 @@ async function cocinaActualizar(){
     .order('created_at',{ascending:true});
   console.log('[cocina] query resultado:', data?.length, 'pedidos | error:', error?.message);
   if(data){
-    _cocina_pedidos = data.filter(p=>(p.items||[]).some(i=>i.cocina));
-    console.log('[cocina] con comida:', _cocina_pedidos.length);
+    // Mostrar todos los pedidos del evento (flag cocina en items es opcional — pedidos viejos no lo tienen)
+    _cocina_pedidos = data;
+    console.log('[cocina] pedidos a mostrar:', _cocina_pedidos.length);
     cocinaRender(_cocina_pedidos);
   }
 }
@@ -2361,7 +2358,7 @@ function cocinaRender(pedidos){
   el.innerHTML = pedidos.map(p => {
     const hora = new Date(p.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
     const listo = _cocina_listos.has(p.id);
-    const itemsComida = (p.items||[]).filter(i=>i.cocina);
+    const itemsComida = (p.items||[]);
     const itemsHtml = itemsComida.map(i=>`
       <div class="cocina-item">
         <span class="cocina-item-qty">${i.qty}×</span>
@@ -2456,7 +2453,7 @@ async function saCargarEventos(){
   const lista = document.getElementById('sa-lista');
   lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--fg2);font-size:.85rem">Cargando…</div>';
   // Necesitamos ver todos los eventos (activos e inactivos) — usamos .neq para traer todo
-  const {data, error} = await _sb.from('eventos').select('id,nombre,slug,activo,pin_caja,pin_cocina').order('created_at',{ascending:false});
+  const {data, error} = await _sb.from('eventos').select('id,nombre,slug,activo,pin_caja,pin_cocina,categorias').order('created_at',{ascending:false});
   if(error){
     lista.innerHTML = `<div style="color:#c00;padding:16px;font-size:.82rem">Error: ${error.message}<br><br><small>¿Creaste la tabla eventos en Supabase?</small></div>`;
     return;
