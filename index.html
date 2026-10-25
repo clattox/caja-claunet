@@ -1078,13 +1078,16 @@ const CFG_DEFAULT = {
   try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
   if(!cfg || !cfg.categorias || !cfg.categorias.length){ cfg = CFG_DEFAULT; localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
 
-  showView('v-intro');
   document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 
   // Restaurar sesión de caja SOLO si hay un evento guardado Y el usuario viene de un reload
   // (no de navegación fresca). NO restaurar en modo menu/cocina/superadmin.
   const eventoGuardado = localStorage.getItem('caja_evento_activo');
   const _urlModo = new URLSearchParams(location.search).get('modo');
+
+  // Si hay parámetros de URL (modo=menu/cocina/superadmin/etc.), no mostrar intro —
+  // el IIFE de abajo se encarga de arrancar la vista correcta.
+  if(!_urlModo){ showView('v-intro'); }
   // Solo restaurar si la página se recargó (performance.navigation.type === 1 o navigationType === reload)
   const _esRecarga = (performance?.navigation?.type === 1) ||
     (performance?.getEntriesByType?.('navigation')?.[0]?.type === 'reload');
