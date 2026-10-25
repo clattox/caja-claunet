@@ -809,7 +809,7 @@ body{
       <input type="number" id="adm-bpin" placeholder="0000" maxlength="4" style="max-width:140px">
     </div>
     <h2 style="margin-top:16px">Categorías y productos</h2>
-    <button class="btn-add-cat" id="btn-cargar-evento" style="background:color-mix(in srgb,var(--yel) 15%,var(--sur));border-color:var(--yel);color:var(--fg);margin-bottom:6px">🎲 Cargar productos Bingo San Gerónimo</button>
+    <button class="btn-add-cat" id="btn-cargar-evento" style="background:color-mix(in srgb,var(--acc) 12%,var(--sur));border-color:var(--acc);color:var(--acc);margin-bottom:6px">☁️ Cargar menú base ClauNet</button>
     <div id="adm-cats"></div>
     <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
     <button class="btn-save" id="btn-guardar">💾 Guardar y cobrar</button>
@@ -1028,47 +1028,41 @@ function showView(id){
 }
 
 // ═══════════════════════════════════════
-//  CONFIG POR DEFECTO (Escuela de Talentos)
+//  CONFIG POR DEFECTO — Menú base ClauNet (plantilla genérica)
 // ═══════════════════════════════════════
 const CFG_DEFAULT = {
-  nombre: '🎲 Bingo San Gerónimo',
-  fecha: '2026-10-24',
+  nombre: '☁️ Mi Evento',
+  fecha: new Date().toISOString().slice(0,10),
   categorias: [
     {
       id: 'bebestibles',
       label: '🥤 Bebestibles',
       productos: [
         {id:'beb01', emoji:'🥫', nombre:'Bebida lata',    precio:1500},
-        {id:'beb02', emoji:'🧃', nombre:'Jugos',          precio:500},
-        {id:'beb03', emoji:'🍺', nombre:'Cerveza 470cc',  precio:2000},
-        {id:'beb04', emoji:'🍺', nombre:'Michelada 500cc',precio:3000},
-        {id:'beb05', emoji:'☕', nombre:'Té / Café',      precio:1000},
+        {id:'beb02', emoji:'🧃', nombre:'Jugo',           precio:500},
+        {id:'beb03', emoji:'🍺', nombre:'Cerveza',        precio:2000},
+        {id:'beb04', emoji:'☕', nombre:'Té / Café',      precio:1000},
+        {id:'beb05', emoji:'💧', nombre:'Agua mineral',   precio:500},
       ]
     },
     {
       id: 'comida',
-      label: '🍔 Para la Guatita',
+      label: '🍔 Comida',
       productos: [
-        {id:'com01', emoji:'🍟', nombre:'Papas Fritas',        precio:1500},
-        {id:'com02', emoji:'🌭', nombre:'Salchipapas',         precio:3000},
-        {id:'com03', emoji:'🌭', nombre:'Completo Italiano',   precio:2500},
-        {id:'com04', emoji:'🥟', nombre:'Empanadas pino',      precio:2500},
-        {id:'com05', emoji:'🫓', nombre:'Sopaipillas',         precio:1000},
-        {id:'com06', emoji:'➕', nombre:'Agregado',            precio:1500},
-        {id:'com07', emoji:'🍦', nombre:'Helado de agua',      precio:500},
+        {id:'com01', emoji:'🍟', nombre:'Papas Fritas',   precio:1500},
+        {id:'com02', emoji:'🌭', nombre:'Completo',       precio:2500},
+        {id:'com03', emoji:'🥟', nombre:'Empanada',       precio:2000},
+        {id:'com04', emoji:'🫓', nombre:'Sopaipilla',     precio:1000},
+        {id:'com05', emoji:'🥩', nombre:'Choripán',       precio:3000},
       ]
     },
     {
-      id: 'especiales',
-      label: '⭐ Especiales',
+      id: 'otros',
+      label: '🎟️ Otros',
       productos: [
-        {id:'esp01', emoji:'🍑', nombre:'Mote con huesillo',   precio:2500},
-        {id:'esp02', emoji:'🍢', nombre:'Anticuchos',          precio:3000},
-        {id:'esp03', emoji:'🍦', nombre:'Helado con bebida',   precio:3000},
-        {id:'esp04', emoji:'🍷', nombre:'Borgoña',             precio:2500},
-        {id:'esp05', emoji:'🍰', nombre:'Trocitos de queque',  precio:1000},
-        {id:'esp06', emoji:'🥤', nombre:'Terremoto',           precio:3500},
-        {id:'esp07', emoji:'🥩', nombre:'Choripán',            precio:3000},
+        {id:'ot01', emoji:'🎫', nombre:'Entrada',         precio:3000},
+        {id:'ot02', emoji:'🎁', nombre:'Rifa',            precio:1000},
+        {id:'ot03', emoji:'⭐', nombre:'Especial',        precio:5000},
       ]
     }
   ]
@@ -1240,7 +1234,7 @@ document.getElementById('fab-guardar').onclick  = accionGuardar;
 document.getElementById('btn-admin-cancel').onclick = () => { if(cfg) abrirCaja(); };
 
 document.getElementById('btn-cargar-evento').onclick = () => {
-  if(!confirm('¿Reemplazar la configuración actual con los productos de la Escuela de Talentos?')) return;
+  if(!confirm('¿Reemplazar la configuración actual con el menú base ClauNet?')) return;
   adminCfg = JSON.parse(JSON.stringify(CFG_DEFAULT));
   document.getElementById('adm-nombre').value = adminCfg.nombre;
   document.getElementById('adm-fecha').value  = adminCfg.fecha;
