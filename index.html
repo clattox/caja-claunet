@@ -156,6 +156,8 @@ button{font-family:inherit;cursor:pointer}
 .btn-add{background:none;border:2px dashed var(--bdr);color:var(--fg2);border-radius:10px;padding:8px;width:100%;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;margin-top:4px}
 .btn-add-cat{background:none;border:2px dashed var(--bdr);color:var(--fg2);border-radius:var(--r);padding:12px;width:100%;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;margin-bottom:10px}
 .btn-save{width:100%;padding:15px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;margin-top:8px}
+.fab-guardar{position:fixed;bottom:24px;right:20px;z-index:100;background:var(--grn);color:#fff;border:none;border-radius:50px;padding:14px 22px;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;display:none;align-items:center;gap:8px;transition:transform .15s}
+.fab-guardar:active{transform:scale(.95)}
 .btn-del-cat{background:none;border:none;color:var(--acc);font-size:.75rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer}
 
 /* ── SETUP (primera vez) ── */
@@ -513,6 +515,9 @@ body{
 </div>
 
 <!-- ══ MODAL PIN ADMIN ══ -->
+<!-- FAB GUARDAR (visible solo en v-admin) -->
+<button class="fab-guardar" id="fab-guardar">💾 Guardar</button>
+
 <!-- MODAL CIERRE DE CAJA -->
 <div class="cierre-overlay" id="cierre-overlay" hidden>
   <div class="cierre-modal">
@@ -623,6 +628,8 @@ const uid = () => Math.random().toString(36).slice(2,8);
 function showView(id){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  const fab = document.getElementById('fab-guardar');
+  fab.style.display = id === 'v-admin' ? 'flex' : 'none';
 }
 
 // ═══════════════════════════════════════
@@ -800,7 +807,7 @@ document.getElementById('btn-add-cat').onclick = () => {
   renderAdminCats();
 };
 
-document.getElementById('btn-guardar').onclick = () => {
+function accionGuardar(){
   const nombre = document.getElementById('adm-nombre').value.trim();
   const fecha  = document.getElementById('adm-fecha').value;
   if(nivelAdmin === 2 && !nombre){ alert('Escribe el nombre del evento'); return; }
@@ -823,7 +830,9 @@ document.getElementById('btn-guardar').onclick = () => {
   localStorage.setItem(LS_CFG, JSON.stringify(cfg));
   carrito = {};
   abrirCaja();
-};
+}
+document.getElementById('btn-guardar').onclick = accionGuardar;
+document.getElementById('fab-guardar').onclick  = accionGuardar;
 
 document.getElementById('btn-admin-cancel').onclick = () => { if(cfg) abrirCaja(); };
 
