@@ -75,6 +75,15 @@ button{font-family:inherit;cursor:pointer}
 .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer;min-height:auto}
 .btn-excel{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:1px solid var(--grn);color:var(--grn);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;min-height:auto}
 .btn-excel:hover{background:color-mix(in srgb,var(--grn) 22%,var(--sur))}
+/* ── MEDIO DE PAGO ── */
+.pago-tag{font-family:'Nunito',sans-serif;font-size:.65rem;font-weight:800;border-radius:6px;padding:2px 6px;white-space:nowrap}
+.pago-tag.ef{background:color-mix(in srgb,var(--grn) 14%,var(--sur));color:var(--grn);border:1px solid color-mix(in srgb,var(--grn) 30%,var(--bdr))}
+.pago-tag.tr{background:color-mix(in srgb,var(--acc) 10%,var(--sur));color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 25%,var(--bdr))}
+.pago-resumen{background:color-mix(in srgb,var(--grn) 10%,var(--sur));border:1px solid color-mix(in srgb,var(--grn) 25%,var(--bdr));border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.pago-resumen.tr{background:color-mix(in srgb,var(--acc) 8%,var(--sur));border-color:color-mix(in srgb,var(--acc) 20%,var(--bdr))}
+.pr-lbl{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;color:var(--fg2)}
+.pr-amt{font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;color:var(--grn)}
+.pago-resumen.tr .pr-amt{color:var(--acc)}
 /* ── STOCK TOGGLE (admin) ── */
 .stk-toggle{display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;min-height:auto}
 .stk-toggle input[type=checkbox]{accent-color:var(--grn);width:15px;height:15px;cursor:pointer;min-height:auto}
@@ -231,7 +240,8 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .modal .mitems{padding:13px 14px;gap:8px;border:1px solid var(--bdr);line-height:1.35}
 .mrow{gap:12px;align-items:flex-start}.mrow span:first-child{overflow-wrap:anywhere}
 .mbtn{min-height:52px;margin-bottom:10px;border-radius:13px;padding:14px 16px}
-.mbtn-ok{background:var(--grn);color:#fff}.mbtn-ok:hover{filter:brightness(1.06)}
+.mbtn-ef{background:var(--grn);color:#fff;border:none!important}.mbtn-ef:hover{filter:brightness(1.06)}
+.mbtn-tr{background:color-mix(in srgb,var(--acc) 12%,var(--sur));color:var(--acc);border:2px solid var(--acc)!important}.mbtn-tr:hover{background:color-mix(in srgb,var(--acc) 20%,var(--sur))}
 .mbtn-print{border-color:var(--yel)!important;color:var(--fg);background:color-mix(in srgb,var(--yel) 12%,var(--sur))}
 .mbtn-back{margin-bottom:0}
 .admin-wrap{max-width:900px;padding:24px 18px 32px}
@@ -511,7 +521,11 @@ body{
     <h2>¡A cobrar!</h2>
     <div class="mtotal" id="m-total"></div>
     <div class="mitems" id="m-items"></div>
-    <button class="mbtn mbtn-ok" id="m-ok">💵 Cobrado — Nueva venta</button>
+    <p style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);margin-bottom:10px">¿Cómo paga?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <button class="mbtn mbtn-ef" id="m-ef">💵 Efectivo</button>
+      <button class="mbtn mbtn-tr" id="m-tr">📲 Transferencia</button>
+    </div>
     <button class="mbtn mbtn-print" id="m-print">🖨️ Imprimir ticket</button>
     <button class="mbtn mbtn-back" id="m-back">← Volver al pedido</button>
   </div>
@@ -978,20 +992,22 @@ document.getElementById('btn-cobr').onclick=()=>{
 document.getElementById('m-back').onclick=()=>{ document.getElementById('modal').hidden=true; };
 document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')) document.getElementById('modal').hidden=true; };
 
-document.getElementById('m-ok').onclick=()=>{
+function registrarVenta(pago){
   const ids=Object.keys(carrito); if(!ids.length) return;
   const total=totalCarrito();
   const now=new Date();
   const hora=now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
   const items=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return {emoji:p.emoji,nombre:p.nombre,qty:q,precio:p.precio,sub:p.precio*q}; });
   const desc=items.map(i=>`${i.emoji}${i.nombre}${i.qty>1?' ×'+i.qty:''}`).join(', ');
-  historial.unshift({num:ventaNum++,desc,total,hora,items});
+  historial.unshift({num:ventaNum++,desc,total,hora,pago,items});
   try{ localStorage.setItem(LS_HIST,JSON.stringify(historial)); }catch(e){}
   carrito={}; renderCarrito(); renderBadges();
   document.getElementById('modal').hidden=true;
   setTab('historial');
   setTimeout(()=>setTab('productos'),1800);
-};
+}
+document.getElementById('m-ef').onclick=()=>registrarVenta('efectivo');
+document.getElementById('m-tr').onclick=()=>registrarVenta('transferencia');
 
 document.getElementById('m-print').onclick=()=>{
   const ids=Object.keys(carrito); if(!ids.length) return;
@@ -1008,11 +1024,18 @@ document.getElementById('m-print').onclick=()=>{
 function renderHistorial(){
   const sec=document.getElementById('tab-historial');
   if(!historial.length){ sec.innerHTML='<div class="cart-empty" style="padding:28px;text-align:center">Sin ventas aún 🎵</div>'; return; }
-  const tot=historial.reduce((a,v)=>a+v.total,0);
+  const tot  = historial.reduce((a,v)=>a+v.total,0);
+  const totEf= historial.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.total,0);
+  const totTr= historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.total,0);
+  const pagoTag = p => p==='efectivo'?'<span class="pago-tag ef">💵 Efectivo</span>':p==='transferencia'?'<span class="pago-tag tr">📲 Transfer</span>':'';
   sec.innerHTML=`
     <div class="hist-hdr"><span>Ventas (${historial.length})</span><div style="display:flex;gap:8px;align-items:center"><button class="btn-excel" id="btn-excel">📊 Excel</button><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div></div>
     <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-amt">${fmt(tot)}</span></div>
-    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}</span><span class="hi-t">${fmt(v.total)}</span></div>`).join('')}`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div class="pago-resumen"><span class="pr-lbl">💵 Efectivo</span><span class="pr-amt">${fmt(totEf)}</span></div>
+      <div class="pago-resumen tr"><span class="pr-lbl">📲 Transfer</span><span class="pr-amt">${fmt(totTr)}</span></div>
+    </div>
+    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="hi-t">${fmt(v.total)}</span>${pagoTag(v.pago)}</div></div>`).join('')}`;
   document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial(); };
   document.getElementById('btn-excel').onclick=()=>exportarExcel();
 }
@@ -1030,22 +1053,29 @@ function exportarExcel(){
   lines.push([]);
 
   // Resumen por venta
-  lines.push(['#Venta','Hora','Descripción','Total'].join(sep));
+  lines.push(['#Venta','Hora','Pago','Descripción','Total'].join(sep));
   historial.forEach(v=>{
-    lines.push([v.num, v.hora||'', (v.desc||'').replace(/;/g,','), v.total].join(sep));
+    lines.push([v.num, v.hora||'', v.pago||'', (v.desc||'').replace(/;/g,','), v.total].join(sep));
   });
   lines.push([]);
 
+  // Totales por medio de pago
+  const totEf = historial.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.total,0);
+  const totTr = historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.total,0);
+  lines.push(['Efectivo', totEf].join(sep));
+  lines.push(['Transferencia', totTr].join(sep));
+  lines.push([]);
+
   // Detalle producto a producto
-  lines.push(['#Venta','Hora','Producto','Cantidad','Precio unit.','Subtotal'].join(sep));
+  lines.push(['#Venta','Hora','Pago','Producto','Cantidad','Precio unit.','Subtotal'].join(sep));
   historial.forEach(v=>{
     if(v.items && v.items.length){
       v.items.forEach(i=>{
-        lines.push([v.num, v.hora||'', (i.nombre||'').replace(/;/g,','), i.qty, i.precio, i.sub].join(sep));
+        lines.push([v.num, v.hora||'', v.pago||'', (i.nombre||'').replace(/;/g,','), i.qty, i.precio, i.sub].join(sep));
       });
     } else {
       // ventas antiguas sin detalle
-      lines.push([v.num, v.hora||'', (v.desc||'').replace(/;/g,','), '', '', v.total].join(sep));
+      lines.push([v.num, v.hora||'', v.pago||'', (v.desc||'').replace(/;/g,','), '', '', v.total].join(sep));
     }
   });
   lines.push([]);
