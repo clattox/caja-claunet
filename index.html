@@ -790,7 +790,19 @@ function getPin() { return localStorage.getItem(LS_PIN)  || PIN_DEFAULT;  }
 function getSPin(){ return localStorage.getItem(LS_SPIN) || SPIN_DEFAULT; }
 
 function pedirPin(){
-  pinBuffer = ''; nivelAdmin = 0;
+  pinBuffer = ''; nivelAdmin = 0; _pinAccion = null;
+  document.getElementById('pin-overlay').querySelector('h3').textContent = 'Acceso Admin';
+  document.getElementById('pin-overlay').querySelector('p').textContent  = 'Ingresa el PIN de 4 dígitos';
+  actualizarDots();
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('pin-overlay').hidden = false;
+}
+
+let _pinAccion = null; // callback de acción protegida
+function pedirPinAccion(cb){
+  _pinAccion = cb; pinBuffer = '';
+  document.getElementById('pin-overlay').querySelector('h3').textContent = '🔒 Confirmar acción';
+  document.getElementById('pin-overlay').querySelector('p').textContent  = 'Solo superadmin puede borrar el historial';
   actualizarDots();
   document.getElementById('pin-err').textContent = '';
   document.getElementById('pin-overlay').hidden = false;
@@ -808,7 +820,17 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
   actualizarDots();
   if(pinBuffer.length === 4){
     setTimeout(()=>{
-      if(pinBuffer === getSPin()){
+      if(_pinAccion){
+        // modo acción protegida: solo superadmin
+        if(pinBuffer === getSPin()){
+          document.getElementById('pin-overlay').hidden = true;
+          const cb = _pinAccion; _pinAccion = null;
+          cb();
+        } else {
+          document.getElementById('pin-err').textContent = 'PIN incorrecto';
+          pinBuffer = ''; actualizarDots();
+        }
+      } else if(pinBuffer === getSPin()){
         nivelAdmin = 2;
         document.getElementById('pin-overlay').hidden = true;
         abrirAdmin(true);
@@ -832,6 +854,7 @@ document.getElementById('pin-del').onclick = () => {
 };
 
 document.getElementById('pin-cancel').onclick = () => {
+  _pinAccion = null;
   document.getElementById('pin-overlay').hidden = true;
 };
 
@@ -1036,7 +1059,9 @@ function renderHistorial(){
       <div class="pago-resumen tr"><span class="pr-lbl">📲 Transfer</span><span class="pr-amt">${fmt(totTr)}</span></div>
     </div>
     ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="hi-t">${fmt(v.total)}</span>${pagoTag(v.pago)}</div></div>`).join('')}`;
-  document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial(); };
+  document.getElementById('btn-borrar').onclick=()=>pedirPinAccion(()=>{
+    historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial();
+  });
   document.getElementById('btn-excel').onclick=()=>exportarExcel();
 }
 
