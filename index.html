@@ -1081,11 +1081,14 @@ const CFG_DEFAULT = {
   showView('v-intro');
   document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 
-  // Restaurar sesión de caja activa al recargar (esperar a que Supabase esté listo)
-  // NO restaurar si estamos en modo menu, cocina o superadmin — esos modos tienen su propio init
+  // Restaurar sesión de caja SOLO si hay un evento guardado Y el usuario viene de un reload
+  // (no de navegación fresca). NO restaurar en modo menu/cocina/superadmin.
   const eventoGuardado = localStorage.getItem('caja_evento_activo');
   const _urlModo = new URLSearchParams(location.search).get('modo');
-  if(eventoGuardado && !_urlModo){
+  // Solo restaurar si la página se recargó (performance.navigation.type === 1 o navigationType === reload)
+  const _esRecarga = (performance?.navigation?.type === 1) ||
+    (performance?.getEntriesByType?.('navigation')?.[0]?.type === 'reload');
+  if(eventoGuardado && !_urlModo && _esRecarga){
     setTimeout(async () => {
       try {
         sbInit();
@@ -1632,14 +1635,21 @@ function registrarVenta(pago){
   try{ localStorage.setItem(LS_HIST,JSON.stringify(historial)); }catch(e){}
   // Si hay items de cocina, mandar a Supabase en estado confirmado (ya cobrado)
   const itemsCocina = items.filter(i=>i.cocina);
-  if(itemsCocina.length && _sb && _eventoActual){
+  const eventoNombre = _eventoActual || cfg?.nombre;
+  if(itemsCocina.length && _sb && eventoNombre){
+    console.log('[caja] enviando a cocina:', eventoNombre, '| items:', itemsCocina.length);
     _sb.from('pedidos').insert({
-      evento: _eventoActual,
+      evento: eventoNombre,
       nombre_cliente: 'Caja',
       items,
       total,
       estado: 'confirmado'
-    }).then(({error})=>{ if(error) console.warn('[caja] error enviando a cocina:', error.message); });
+    }).then(({error})=>{
+      if(error) console.warn('[caja] error enviando a cocina:', error.message);
+      else console.log('[caja] enviado a cocina OK');
+    });
+  } else {
+    console.log('[caja] sin items de cocina o sin conexión (_eventoActual:', _eventoActual, '| cfg.nombre:', cfg?.nombre, ')');
   }
   carrito={}; renderCarrito(); renderBadges();
   document.getElementById('modal').hidden=true;
@@ -2502,6 +2512,10 @@ async function saCargarEventos(){
         <button class="sa-btn ${ev.activo?'sa-btn-toggle-on':'sa-btn-toggle-off'}" onclick="saToggleActivo('${ev.id}',${ev.activo})">${ev.activo?'✓ Activo':'○ Inactivo'}</button>
         <button class="sa-btn sa-btn-del" onclick="saEliminarEvento('${ev.id}','${ev.nombre.replace(/'/g,"\\'")}')" title="Eliminar">🗑</button>
       </div>
+      ${slug ? `<div style="display:flex;gap:8px;margin-top:8px">
+        <a href="?evento=${encodeURIComponent(slug)}&modo=menu" target="_blank" style="flex:1;display:block;padding:7px;border-radius:8px;background:color-mix(in srgb,var(--acc) 15%,var(--sur));color:var(--acc);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;text-align:center;text-decoration:none">🧑‍💻 Abrir cliente</a>
+        <a href="?evento=${encodeURIComponent(slug)}&modo=cocina" target="_blank" style="flex:1;display:block;padding:7px;border-radius:8px;background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;text-align:center;text-decoration:none">🍳 Abrir cocina</a>
+      </div>` : ''}
     </div>`;
   }).join('');
 }
