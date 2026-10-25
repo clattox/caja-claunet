@@ -467,38 +467,111 @@ button:active:not(:disabled){transform:scale(.98)}
 .sa-cat-editor{background:var(--bg);border-radius:10px;padding:10px 12px;border:1px solid var(--bdr)}
 
 /* ══ VISTA COCINA ══ */
-#v-cocina{background:var(--bg)}
-.cocina-hdr{background:#1a3a1a;color:#fff;padding:14px 16px;text-align:center;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between}
-.cocina-conn{font-size:.72rem;opacity:.8}
-.cocina-lista{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
-.cocina-card{background:var(--sur);border:2px solid var(--grn);border-radius:14px;padding:14px;position:relative}
-.cocina-card.listo{opacity:.45;border-color:var(--bdr)}
-.cocina-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.cocina-mesa{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--fg)}
-.cocina-hora{font-size:.72rem;color:var(--fg2)}
-.cocina-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:.92rem}
-.cocina-item:last-child{border-bottom:none}
-.cocina-item-qty{background:var(--grn);color:#fff;border-radius:6px;padding:2px 8px;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;flex-shrink:0}
-.cocina-item-nm{font-family:'Nunito',sans-serif;font-weight:800;color:var(--fg);flex:1}
-.btn-cocina-listo{width:100%;margin-top:12px;padding:12px;border:none;border-radius:10px;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer}
-.cocina-card.listo .btn-cocina-listo{background:var(--bdr);color:var(--fg2)}
-.cocina-vacio{text-align:center;padding:60px 20px;color:var(--fg2);font-size:.95rem;font-weight:700}
+:root{
+  --ck-bg:#F0FAF5;--ck-hdr:#075B3A;--ck-hdr2:#0F8055;
+  --ck-pending:#E4444A;--ck-prep:#F59E0B;--ck-ready:#10B981;
+  --mn-primary:#1E6BB8;--mn-primary-h:#18599A;--mn-surface:#F4F8FF;--mn-card:#FFFFFF;--mn-muted:#E9F3FF;--mn-text:#172B4D;--mn-text2:#5B7290;--mn-border:#D5E4F3;
+  --sh-card:0 4px 14px rgba(23,43,77,.08);--r-card:14px;--r-ctrl:10px;
+}
+#v-cocina{background:var(--ck-bg)}
+.cocina-hdr{background:var(--ck-hdr);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 2px 12px rgba(7,91,58,.3)}
+.cocina-hdr-brand{display:flex;align-items:center;gap:10px}
+.cocina-hdr-brand h1{font-family:'Nunito',sans-serif;font-size:1.15rem;font-weight:900;line-height:1.1}
+.cocina-hdr-brand p{font-size:.7rem;opacity:.8;font-weight:600;margin-top:1px}
+.cocina-hdr-right{display:flex;align-items:center;gap:10px}
+.cocina-conn{font-size:.72rem;font-weight:700;background:rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:5px}
+.cocina-conn.online{color:#86efac}
+.cocina-conn.offline{color:#fca5a5}
+.btn-cocina-refresh{background:#fff;border:none;color:var(--ck-hdr);border-radius:var(--r-ctrl);padding:8px 14px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-cocina-refresh:hover{background:#f0fff8}
+.cocina-lista{padding:14px 16px;display:grid;grid-template-columns:1fr;gap:12px;max-width:900px;margin:0 auto}
+@media(min-width:700px){.cocina-lista{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1100px){.cocina-lista{grid-template-columns:repeat(3,1fr)}}
+.cocina-card{background:#fff;border-radius:var(--r-card);padding:0;box-shadow:var(--sh-card);border:2px solid #D1FAE5;overflow:hidden;transition:opacity .3s,box-shadow .2s}
+.cocina-card:hover{box-shadow:0 6px 20px rgba(7,91,58,.12)}
+.cocina-card.listo{opacity:.5;border-color:#E5E7EB;box-shadow:none}
+.cocina-card.pendiente-urgente{border-color:var(--ck-pending);animation:pulse-red 2s ease-in-out infinite}
+@keyframes pulse-red{0%,100%{box-shadow:0 4px 14px rgba(228,68,74,.1)}50%{box-shadow:0 4px 20px rgba(228,68,74,.28)}}
+@media(prefers-reduced-motion:reduce){.cocina-card.pendiente-urgente{animation:none}}
+.cocina-card-top{padding:12px 14px 10px;border-bottom:1px solid #F0F4F8;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.cocina-card-num{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--ck-hdr);line-height:1}
+.cocina-card-meta{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.cocina-hora{font-size:.7rem;color:#9CA3AF;font-weight:600}
+.cocina-elapsed{font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:3px}
+.cocina-elapsed.ok{background:#DCFCE7;color:#15803D}
+.cocina-elapsed.warn{background:#FEF3C7;color:#B45309}
+.cocina-elapsed.late{background:#FEE2E2;color:#B91C1C}
+.cocina-card-mid{padding:8px 14px;display:flex;align-items:center;gap:6px}
+.cocina-mesa{font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;color:#374151}
+.cocina-estado-badge{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+.cocina-estado-badge.pendiente{background:#FEE2E2;color:var(--ck-pending)}
+.cocina-estado-badge.confirmado{background:#FEF3C7;color:#92400E}
+.cocina-estado-badge.listo{background:#DCFCE7;color:#15803D}
+.cocina-items-wrap{padding:4px 14px 12px}
+.cocina-items-list{display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}
+.cocina-item-pill{display:inline-flex;align-items:center;gap:5px;background:#F0FAF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:5px 10px;font-size:.82rem}
+.cocina-item-qty{font-family:'Nunito',sans-serif;font-weight:900;color:var(--ck-hdr2);background:#D1FAE5;border-radius:5px;padding:1px 6px;font-size:.78rem;flex-shrink:0}
+.cocina-item-nm{font-family:'Nunito',sans-serif;font-weight:800;color:#1F2937}
+.cocina-card-foot{padding:10px 14px 12px;border-top:1px solid #F0F4F8}
+.btn-cocina-listo{width:100%;padding:11px;border:none;border-radius:var(--r-ctrl);background:var(--ck-hdr2);color:#fff;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(15,128,85,.3)}
+.btn-cocina-listo:hover:not(:disabled){background:var(--ck-hdr)}
+.btn-cocina-listo:active:not(:disabled){transform:scale(.97)}
+.btn-cocina-listo:disabled{background:#E5E7EB;color:#9CA3AF;box-shadow:none;cursor:default}
+.cocina-vacio{text-align:center;padding:60px 20px;color:#9CA3AF;font-size:.95rem;font-weight:700;grid-column:1/-1}
+.cocina-vacio-icon{font-size:3rem;margin-bottom:12px}
 
 /* ══ VISTA CLIENTE (menú QR) ══ */
-#v-menu .menu-hdr{background:linear-gradient(90deg,#1a6fb5,#0d4a8a);color:#fff;padding:16px;text-align:center}
-#v-menu .menu-hdr h1{font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900}
-#v-menu .menu-hdr p{font-size:.78rem;opacity:.85;margin-top:2px}
-.menu-paso{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--sur);border-bottom:1px solid var(--bdr);font-size:.82rem;font-weight:700;color:var(--acc)}
-.menu-paso span{background:var(--acc);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0}
-.menu-nombre-wrap{padding:14px 16px;background:var(--sur);border-bottom:2px solid var(--bdr)}
-.menu-nombre-wrap input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid var(--bdr);background:var(--bg);color:var(--fg);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700}
-.menu-nombre-wrap input:focus{outline:none;border-color:var(--acc)}
-.btn-enviar-pedido{width:calc(100% - 32px);margin:16px;padding:16px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;box-shadow:0 4px 14px rgba(42,157,92,.4)}
-.btn-enviar-pedido:disabled{background:var(--bdr);color:var(--fg2);box-shadow:none}
+#v-menu{background:var(--mn-surface)}
+#v-menu .menu-hdr{background:linear-gradient(135deg,var(--mn-primary) 0%,var(--mn-primary-h) 100%);color:#fff;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 12px rgba(30,107,184,.3)}
+.menu-hdr-brand h1{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;line-height:1.2}
+.menu-hdr-brand p{font-size:.7rem;opacity:.82;margin-top:2px;font-weight:600}
+.menu-hdr-logo{font-size:1.8rem;line-height:1;flex-shrink:0}
+.menu-paso{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--mn-card);border-bottom:1px solid var(--mn-border);font-size:.85rem;font-weight:700;color:var(--mn-primary)}
+.menu-paso-num{background:var(--mn-primary);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:900;flex-shrink:0}
+.menu-nombre-wrap{padding:14px 18px 18px;background:var(--mn-card);border-bottom:2px solid var(--mn-border)}
+.menu-nombre-label{font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;color:var(--mn-text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.menu-nombre-inner{position:relative;display:flex;align-items:center}
+.menu-nombre-icon{position:absolute;left:12px;color:var(--mn-text2);font-size:.9rem;pointer-events:none}
+.menu-nombre-wrap input{width:100%;padding:12px 14px 12px 36px;border-radius:var(--r-ctrl);border:2px solid var(--mn-border);background:var(--mn-surface);color:var(--mn-text);font-family:'Nunito',sans-serif;font-size:.98rem;font-weight:700;transition:border-color .15s,box-shadow .15s}
+.menu-nombre-wrap input:focus{outline:none;border-color:var(--mn-primary);box-shadow:0 0 0 3px rgba(30,107,184,.12)}
+.menu-nombre-wrap input::placeholder{color:#A0AEC0;font-weight:600}
+.menu-cats-wrap{padding:0 18px 8px}
+.menu-cat-titulo{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--mn-text2);padding:16px 0 8px;display:flex;align-items:center;gap:8px}
+.menu-cat-titulo::after{content:'';flex:1;height:1px;background:var(--mn-border)}
+.menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding-bottom:4px}
+@media(min-width:400px){.menu-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:600px){.menu-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.menu-grid{grid-template-columns:repeat(4,1fr)}}
+.menu-prd{background:var(--mn-card);border:2px solid var(--mn-border);border-radius:var(--r-card);padding:14px 10px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;box-shadow:var(--sh-card);cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:border-color .15s,box-shadow .15s,transform .1s}
+.menu-prd:hover{border-color:var(--mn-primary);box-shadow:0 4px 16px rgba(30,107,184,.12)}
+.menu-prd:active{transform:scale(.95)}
+.menu-prd.incart{border-color:var(--mn-primary);background:linear-gradient(180deg,#EBF4FF 0%,#fff 100%);box-shadow:0 4px 14px rgba(30,107,184,.15)}
+.menu-prd .m-em{font-size:2.2rem;line-height:1;pointer-events:none;margin-bottom:2px}
+.menu-prd .m-nm{font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;color:var(--mn-text);line-height:1.2;pointer-events:none;min-height:2em;display:flex;align-items:center;justify-content:center;text-align:center}
+.menu-prd .m-pr{font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:900;color:var(--mn-primary);pointer-events:none}
+.menu-prd .m-add{width:30px;height:30px;border-radius:50%;border:none;background:var(--mn-primary);color:#fff;font-size:1.2rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;pointer-events:none;box-shadow:0 2px 6px rgba(30,107,184,.35);margin-top:2px;transition:background .15s,transform .1s}
+.menu-prd:active .m-add{transform:scale(.88)}
+.menu-prd.incart .m-add{background:var(--mn-primary-h)}
+.menu-prd .m-bdg{position:absolute;top:-8px;right:-8px;background:var(--mn-primary);color:#fff;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:900;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,107,184,.3);pointer-events:none}
+.menu-resumen-box{background:var(--mn-card);border-radius:var(--r-card);border:1.5px solid var(--mn-border);overflow:hidden;margin:0 18px 4px;box-shadow:var(--sh-card)}
+.menu-resumen-hdr{padding:10px 14px;background:var(--mn-muted);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--mn-text2);border-bottom:1px solid var(--mn-border);display:flex;align-items:center;gap:6px}
+.menu-resumen-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--mn-border)}
+.menu-resumen-item:last-child{border-bottom:none}
+.menu-ri-nm{flex:1;font-family:'Nunito',sans-serif;font-size:.84rem;font-weight:700;color:var(--mn-text)}
+.menu-ri-sub{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--mn-primary);min-width:56px;text-align:right}
+.menu-total-row{padding:10px 14px;background:var(--mn-muted);border-top:2px solid var(--mn-border);display:flex;justify-content:space-between;align-items:center}
+.menu-total-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;color:var(--mn-text2)}
+.menu-total-amt{font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;color:var(--mn-primary)}
+.menu-send-wrap{padding:14px 18px 20px}
+.btn-enviar-pedido{width:100%;padding:15px;border-radius:var(--r-ctrl);border:none;background:linear-gradient(135deg,#0F8055,#075B3A);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;box-shadow:0 4px 14px rgba(7,91,58,.35);display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s,transform .1s,box-shadow .15s;cursor:pointer}
+.btn-enviar-pedido:hover:not(:disabled){background:linear-gradient(135deg,#0a6040,#054a2e)}
+.btn-enviar-pedido:active:not(:disabled){transform:scale(.97)}
+.btn-enviar-pedido:disabled{background:#CBD5E1;color:#94A3B8;box-shadow:none;cursor:default}
+.menu-footer{text-align:center;font-size:.7rem;color:var(--mn-text2);padding-bottom:24px;padding-top:4px}
 .menu-estado{padding:40px 20px;text-align:center}
 .menu-estado .big-icon{font-size:4rem;margin-bottom:12px}
-.menu-estado h2{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:var(--acc)}
-.menu-estado p{color:var(--fg2);font-size:.88rem;margin-top:8px}
+.menu-estado h2{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:var(--mn-primary)}
+.menu-estado p{color:var(--mn-text2);font-size:.88rem;margin-top:8px}
 
 /* ══ BANDEJA PEDIDOS (en caja) ══ */
 .pedidos-badge{position:absolute;top:-6px;right:-6px;background:#e53;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:900;display:flex;align-items:center;justify-content:center}
@@ -621,12 +694,20 @@ body{
 <!-- ══ VISTA COCINA ══ -->
 <div class="view" id="v-cocina">
   <div class="cocina-hdr">
-    <span>🍳 Cocina</span>
-    <span class="cocina-conn" id="cocina-conn">⚪ Conectando…</span>
-    <button onclick="cocinaActualizar()" style="background:#fff;border:none;color:#1a3a1a;border-radius:10px;padding:8px 16px;font-size:.85rem;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.2)">🔄 Actualizar</button>
+    <div class="cocina-hdr-brand">
+      <span style="font-size:1.6rem;line-height:1">🍳</span>
+      <div>
+        <h1>Cocina</h1>
+        <p>Pedidos en tiempo real</p>
+      </div>
+    </div>
+    <div class="cocina-hdr-right">
+      <span class="cocina-conn offline" id="cocina-conn">⚪ Conectando…</span>
+      <button class="btn-cocina-refresh" onclick="cocinaActualizar()">🔄 Actualizar</button>
+    </div>
   </div>
   <div class="cocina-lista" id="cocina-lista">
-    <div class="cocina-vacio">Esperando comandas… 🍽️</div>
+    <div class="cocina-vacio"><div class="cocina-vacio-icon">🍽️</div>Esperando comandas…</div>
   </div>
 </div>
 
@@ -677,28 +758,34 @@ body{
 <!-- ══ VISTA CLIENTE (menú QR) ══ -->
 <div class="view" id="v-menu">
   <!-- Estado: enviando/confirmado -->
-  <div id="menu-estado-ok" class="menu-estado" hidden>
-    <div class="big-icon">✅</div>
-    <h2>¡Pedido enviado!</h2>
-    <p id="menu-estado-txt">Tu pedido está en camino a la caja.</p>
-    <button onclick="menuReiniciar()" style="margin-top:20px;padding:12px 24px;border-radius:10px;border:none;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-weight:900">Hacer otro pedido</button>
-  </div>
+  <div id="menu-estado-ok" class="menu-estado" hidden></div>
   <!-- Formulario pedido -->
   <div id="menu-form">
     <div class="menu-hdr">
-      <h1 id="menu-evento-nombre">🛒 Menú</h1>
-      <p>Elige tus productos y envía tu pedido</p>
+      <div class="menu-hdr-brand">
+        <h1 id="menu-evento-nombre">🛒 Menú</h1>
+        <p>Elige tus productos y envía tu pedido</p>
+      </div>
+      <div class="menu-hdr-logo">🛒</div>
     </div>
-    <div class="menu-paso"><span>1</span> ¿Cómo te llamamos?</div>
+    <div class="menu-paso"><span class="menu-paso-num">1</span> ¿Cómo te llamamos?</div>
     <div class="menu-nombre-wrap">
-      <input type="text" id="menu-nombre" placeholder="Tu nombre o número de mesa…" maxlength="40" autocomplete="off">
+      <div class="menu-nombre-label">Tu nombre o número de mesa</div>
+      <div class="menu-nombre-inner">
+        <span class="menu-nombre-icon">👤</span>
+        <input type="text" id="menu-nombre" placeholder="Ej: Juan o Mesa 3…" maxlength="40" autocomplete="off">
+      </div>
     </div>
-    <div class="menu-paso"><span>2</span> Elige tus productos</div>
-    <div style="padding:0 14px 8px" id="menu-grids"></div>
-    <div class="menu-paso"><span>3</span> Tu pedido</div>
-    <div id="menu-resumen" style="padding:0 16px 8px"></div>
-    <button class="btn-enviar-pedido" id="btn-enviar-pedido" disabled>✉️ Enviar pedido</button>
-    <p style="text-align:center;font-size:.72rem;color:var(--fg2);padding-bottom:20px">ClauNet · Caja Rápida</p>
+    <div class="menu-paso"><span class="menu-paso-num">2</span> Elige tus productos</div>
+    <div class="menu-cats-wrap" id="menu-grids"></div>
+    <div class="menu-paso"><span class="menu-paso-num">3</span> Tu pedido</div>
+    <div id="menu-resumen"></div>
+    <div class="menu-send-wrap">
+      <button class="btn-enviar-pedido" id="btn-enviar-pedido" disabled>
+        <span>📨</span> Enviar pedido
+      </button>
+    </div>
+    <p class="menu-footer">ClauNet · Caja Rápida</p>
   </div>
 </div>
 
@@ -2206,14 +2293,15 @@ function renderMenuGrids(){
   el.innerHTML = cfg.categorias.map(cat => {
     const prods = cat.productos.filter(p=>!p.oculto && p.precio > 0);
     if(!prods.length) return '';
-    return `<div class="cat-titulo">${cat.label||cat.nombre}</div>
-    <div class="grid">${prods.map(p => {
+    return `<div class="menu-cat-titulo">${cat.emoji||''} ${cat.label||cat.nombre}</div>
+    <div class="menu-grid">${prods.map(p => {
       const q = menuCarrito[p.id]||0;
-      return `<div class="prd${q?' incart':''}" onclick="menuToggle('${p.id}')">
-        ${q?`<div class="bdg">${q}</div>`:''}
-        <div class="em">${p.emoji||'🛍️'}</div>
-        <div class="nm">${p.nombre}</div>
-        <div class="pr">${fmt(p.precio)}</div>
+      return `<div class="menu-prd${q?' incart':''}" onclick="menuToggle('${p.id}')">
+        ${q?`<div class="m-bdg">${q}</div>`:''}
+        <div class="m-em">${p.emoji||'🛍️'}</div>
+        <div class="m-nm">${p.nombre}</div>
+        <div class="m-pr">${fmt(p.precio)}</div>
+        <div class="m-add">+</div>
       </div>`;
     }).join('')}</div>`;
   }).join('');
@@ -2238,16 +2326,18 @@ function renderMenuResumen(){
   }).filter(Boolean);
   const total = items.reduce((a,i)=>a+i.sub,0);
   if(!items.length){
-    el.innerHTML = '<p style="color:var(--fg2);font-size:.82rem;padding:8px 2px">Aún no elegiste nada 👆</p>';
+    el.innerHTML = '<p style="color:var(--mn-text2);font-size:.82rem;padding:8px 18px">Aún no elegiste nada 👆</p>';
     btn.disabled = true;
-    btn.textContent = '✉️ Enviar pedido';
+    btn.innerHTML = '<span>📨</span> Enviar pedido';
     return;
   }
-  el.innerHTML = `<div class="cart-box"><div style="padding:10px 14px">${
-    items.map(i=>`<div class="citem"><span class="ci-nm">${i.qty}× ${i.nombre}</span><span class="ci-sub">${fmt(i.sub)}</span></div>`).join('')
-  }<div class="citem" style="border-top:2px solid var(--bdr);margin-top:4px"><span class="ci-nm" style="font-weight:900">Total</span><span class="ci-sub" style="font-size:1rem">${fmt(total)}</span></div></div></div>`;
+  el.innerHTML = `<div class="menu-resumen-box">
+    <div class="menu-resumen-hdr">🛒 Tu pedido</div>
+    ${items.map(i=>`<div class="menu-resumen-item"><span class="menu-ri-nm">${i.qty}× ${i.nombre}</span><span class="menu-ri-sub">${fmt(i.sub)}</span></div>`).join('')}
+    <div class="menu-total-row"><span class="menu-total-lbl">Total</span><span class="menu-total-amt">${fmt(total)}</span></div>
+  </div>`;
   btn.disabled = false;
-  btn.textContent = `✉️ Enviar pedido · ${fmt(total)}`;
+  btn.innerHTML = `<span>📨</span> Enviar pedido · ${fmt(total)}`;
   btn.onclick = () => sbEnviarPedido(items, total);
 }
 
@@ -2289,19 +2379,19 @@ function mostrarEstadoCliente(estado, nombre){
   document.getElementById('menu-form').hidden = true;
   document.getElementById('menu-estado-ok').hidden = false;
   const estados = {
-    pendiente: { icon:'⏳', titulo:'Pedido recibido', msg:'Esperando confirmación de caja…', color:'var(--fg2)' },
-    confirmado: { icon:'✅', titulo:'¡Confirmado!', msg:'Tu pedido está siendo preparado 🍳', color:'var(--grn)' },
-    listo:      { icon:'🔔', titulo:'¡Listo para retirar!', msg:'Acércate a buscar tu pedido 🎉', color:'var(--yel)' },
-    rechazado:  { icon:'❌', titulo:'Pedido rechazado', msg:'Consulta en la caja.', color:'#e53' },
+    pendiente: { icon:'⏳', titulo:'Pedido recibido', msg:'Esperando confirmación de caja…', color:'var(--mn-text2)', bg:'var(--mn-muted)' },
+    confirmado: { icon:'🍳', titulo:'¡Confirmado!', msg:'Tu pedido está siendo preparado', color:'#075B3A', bg:'#F0FAF5' },
+    listo:      { icon:'🔔', titulo:'¡Listo para retirar!', msg:'Acércate a buscar tu pedido 🎉', color:'#92400E', bg:'#FFFBEB' },
+    rechazado:  { icon:'❌', titulo:'Pedido rechazado', msg:'Consulta en la caja.', color:'#B91C1C', bg:'#FEF2F2' },
   };
   const e = estados[estado] || estados.pendiente;
   document.getElementById('menu-estado-ok').innerHTML = `
-    <div style="text-align:center;padding:40px 20px;display:flex;flex-direction:column;align-items:center;gap:16px">
-      <div style="font-size:4rem;line-height:1">${e.icon}</div>
-      <div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:${e.color}">${e.titulo}</div>
-      <div style="font-size:.92rem;color:var(--fg2);font-weight:700">${e.msg}</div>
-      <div style="font-size:.82rem;color:var(--fg2);opacity:.7">👤 ${nombre}</div>
-      ${estado==='listo'||estado==='rechazado'||estado==='entregado' ? `<button onclick="menuReiniciar()" style="margin-top:10px;padding:12px 28px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">Nuevo pedido</button>` : ''}
+    <div style="min-height:100dvh;background:${e.bg};display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;gap:16px">
+      <div style="font-size:5rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.12))">${e.icon}</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:1.5rem;font-weight:900;color:${e.color}">${e.titulo}</div>
+      <div style="font-size:.92rem;color:var(--mn-text2);font-weight:600;max-width:280px">${e.msg}</div>
+      <div style="font-size:.8rem;color:var(--mn-text2);background:var(--mn-card);border:1.5px solid var(--mn-border);border-radius:20px;padding:5px 14px;display:inline-flex;align-items:center;gap:6px">👤 ${nombre}</div>
+      ${estado==='listo'||estado==='rechazado'||estado==='entregado' ? `<button onclick="menuReiniciar()" style="margin-top:10px;padding:13px 30px;border:none;border-radius:10px;background:var(--mn-primary);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(30,107,184,.3)">Nuevo pedido</button>` : ''}
     </div>`;
 }
 
@@ -2364,12 +2454,21 @@ async function iniciarModoCocina(eventoParam){
       })
     .subscribe(status => {
       const el = document.getElementById('cocina-conn');
-      if(el) el.textContent = status==='SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
+      if(el){
+        if(status==='SUBSCRIBED'){
+          el.textContent='● En línea'; el.className='cocina-conn online';
+        } else {
+          el.textContent='● Sin conexión'; el.className='cocina-conn offline';
+        }
+      }
     });
   cocinaActualizar();
   // Polling cada 6s como respaldo del realtime (INSERT no siempre llega por WS)
   if(window._cocinaPoller) clearInterval(window._cocinaPoller);
   window._cocinaPoller = setInterval(cocinaActualizar, 6000);
+  // Refrescar tiempos transcurridos cada 60s sin recargar datos
+  if(window._cocinaClockPoller) clearInterval(window._cocinaClockPoller);
+  window._cocinaClockPoller = setInterval(()=>{ if(_cocina_pedidos.length) cocinaRender(_cocina_pedidos); }, 60000);
 }
 
 let _cocina_pedidos = [];
@@ -2389,38 +2488,76 @@ async function cocinaActualizar(){
   }
 }
 
+function _cocinaElapsed(created_at){
+  if(!created_at) return {label:'', cls:'ok'};
+  const mins = Math.round((Date.now() - new Date(created_at).getTime()) / 60000);
+  if(mins < 1) return {label:'Hace unos segundos', cls:'ok'};
+  if(mins < 5) return {label:`Hace ${mins} min`, cls:'ok'};
+  if(mins < 12) return {label:`Hace ${mins} min`, cls:'warn'};
+  return {label:`Hace ${mins} min`, cls:'late'};
+}
+
+let _cocinaNumMap = {};
+let _cocinaNumCounter = 10;
+
 function cocinaRender(pedidos){
   const el = document.getElementById('cocina-lista');
   if(!el) return;
-  if(!pedidos.length){ el.innerHTML='<div class="cocina-vacio">Sin comandas pendientes ✅</div>'; return; }
+  if(!pedidos.length){ el.innerHTML='<div class="cocina-vacio"><div class="cocina-vacio-icon">✅</div>Sin comandas pendientes</div>'; return; }
+  // Asignar números visuales consecutivos si no los tienen
+  pedidos.forEach(p=>{
+    if(!_cocinaNumMap[p.id]) _cocinaNumMap[p.id] = _cocinaNumCounter++;
+  });
   el.innerHTML = pedidos.map(p => {
     const hora = new Date(p.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    const listo = _cocina_listos.has(p.id);
-    const itemsComida = (p.items||[]);
-    const itemsHtml = itemsComida.map(i=>`
-      <div class="cocina-item">
+    const listo = _cocina_listos.has(p.id) || p.estado === 'listo';
+    const elapsed = _cocinaElapsed(p.created_at);
+    const estado = listo ? 'listo' : (p.estado || 'confirmado');
+    const estadoLabel = {pendiente:'⏳ Pendiente', confirmado:'🍳 En preparación', listo:'✅ Listo'}[estado] || estado;
+    const estadoCls = listo ? 'listo' : (p.estado === 'pendiente' ? 'pendiente' : 'confirmado');
+    const num = _cocinaNumMap[p.id] || '—';
+    const itemsHtml = (p.items||[]).map(i=>`
+      <div class="cocina-item-pill">
         <span class="cocina-item-qty">${i.qty}×</span>
-        <span class="cocina-item-nm">${i.nombre}</span>
+        <span class="cocina-item-nm">${i.emoji||''} ${i.nombre}</span>
       </div>`).join('');
-    return `<div class="cocina-card ${listo?'listo':''}" id="cc-${p.id}">
-      <div class="cocina-card-hdr">
-        <span class="cocina-mesa">👤 ${p.nombre_cliente||'Mesa'}${p.mesa?' · Mesa '+p.mesa:''}</span>
-        <span class="cocina-hora">${hora}</span>
+    const urgente = !listo && elapsed.cls === 'late' ? ' pendiente-urgente' : '';
+    return `<div class="cocina-card${listo?' listo':''}${urgente}" id="cc-${p.id}">
+      <div class="cocina-card-top">
+        <div class="cocina-card-num">#${num}</div>
+        <div class="cocina-card-meta">
+          <span class="cocina-hora">🕐 ${hora}</span>
+          <span class="cocina-elapsed ${elapsed.cls}">⏱ ${elapsed.label}</span>
+        </div>
       </div>
-      ${itemsHtml}
-      <button class="btn-cocina-listo" onclick="cocinaListo('${p.id}')" ${listo?'disabled':''}>
-        ${listo?'✅ Entregado':'✅ Marcar como listo'}
-      </button>
+      <div class="cocina-card-mid">
+        <span class="cocina-mesa">👤 ${p.nombre_cliente||'Anónimo'}${p.mesa?' · Mesa '+p.mesa:''}</span>
+        <span class="cocina-estado-badge ${estadoCls}">${estadoLabel}</span>
+      </div>
+      <div class="cocina-items-wrap">
+        <div class="cocina-items-list">${itemsHtml}</div>
+      </div>
+      <div class="cocina-card-foot">
+        <button class="btn-cocina-listo" onclick="cocinaListo('${p.id}')" ${listo?'disabled':''}>
+          ${listo?'✅ Entregado':'🔔 Listo para entregar'}
+        </button>
+      </div>
     </div>`;
   }).join('');
 }
 
 function cocinaListo(id){
   const card = document.getElementById('cc-'+id);
-  if(card){ card.classList.add('listo'); card.querySelector('.btn-cocina-listo').disabled=true; card.querySelector('.btn-cocina-listo').textContent='🔔 Avisando al cliente…'; }
+  if(card){
+    card.classList.add('listo');
+    const btn = card.querySelector('.btn-cocina-listo');
+    if(btn){ btn.disabled=true; btn.textContent='✅ Avisando…'; }
+    const badge = card.querySelector('.cocina-estado-badge');
+    if(badge){ badge.className='cocina-estado-badge listo'; badge.textContent='✅ Listo'; }
+  }
   _sb && _sb.from('pedidos').update({estado:'listo'}).eq('id',id).then(()=>{
     _cocina_pedidos = _cocina_pedidos.filter(p=>p.id!==id);
-    setTimeout(()=>{ const c=document.getElementById('cc-'+id); if(c) c.style.display='none'; }, 2500);
+    setTimeout(()=>{ const c=document.getElementById('cc-'+id); if(c) c.style.opacity='0'; setTimeout(()=>{ const c2=document.getElementById('cc-'+id); if(c2) c2.style.display='none'; },400); }, 2500);
   });
 }
 
