@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/otpauth@9.3.6/dist/otpauth.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 :root,[data-theme="light"]{--bg:#a8c8e8;--sur:#c8dff2;--fg:#0a1628;--fg2:#3a5070;--acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#90b8d8;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
 [data-theme="dark"]{--bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;--acc:#4a9fd5;--yel:#f7a800;--grn:#48c59b;--bdr:#1a3050;--sh:0 2px 10px rgba(0,0,0,.30)}
@@ -2699,7 +2699,7 @@ function _mostrarTotpQR(uri, b32){
     <div style="font-size:2rem;margin-bottom:4px">🔐</div>
     <div style="font-family:Nunito,sans-serif;font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:4px">Configurar Autenticador</div>
     <div style="font-family:Nunito,sans-serif;font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:16px">Escanea con Google Authenticator o Authy</div>
-    <canvas id="totp-qr-canvas" style="border-radius:12px;background:#fff;padding:10px;width:180px;height:180px"></canvas>
+    <div id="totp-qr-canvas" style="display:inline-block;border-radius:12px;background:#fff;padding:10px"></div>
     <div style="font-family:monospace;font-size:.72rem;color:rgba(255,255,255,.45);margin:12px 0 4px;word-break:break-all;padding:0 8px">${b32}</div>
     <div style="font-family:Nunito,sans-serif;font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:18px">Copia el código si no puedes escanear el QR</div>
     <button onclick="document.getElementById('totp-setup-overlay').style.display='none'"
@@ -2707,10 +2707,13 @@ function _mostrarTotpQR(uri, b32){
       ✅ Listo, ya lo escaneé
     </button>
   </div>`;
-  // Generar QR en canvas
+  // Generar QR con qrcodejs
   setTimeout(()=>{
-    const canvas = document.getElementById('totp-qr-canvas');
-    if(canvas && window.QRCode) QRCode.toCanvas(canvas, uri, {width:180,margin:1}, ()=>{});
+    const el = document.getElementById('totp-qr-canvas');
+    if(el && window.QRCode){
+      el.innerHTML = '';
+      new QRCode(el, { text: uri, width: 180, height: 180, correctLevel: QRCode.CorrectLevel.M });
+    }
   }, 50);
 }
 
