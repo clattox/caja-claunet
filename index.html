@@ -1081,8 +1081,10 @@ const CFG_DEFAULT = {
   document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 
   // Restaurar sesión de caja activa al recargar (esperar a que Supabase esté listo)
+  // NO restaurar si estamos en modo menu, cocina o superadmin — esos modos tienen su propio init
   const eventoGuardado = localStorage.getItem('caja_evento_activo');
-  if(eventoGuardado && cfg && cfg.nombre){
+  const _urlModo = new URLSearchParams(location.search).get('modo');
+  if(eventoGuardado && cfg && cfg.nombre && !_urlModo){
     setTimeout(() => {
       try {
         _eventoActual = eventoGuardado;
