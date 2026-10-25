@@ -75,6 +75,15 @@ button{font-family:inherit;cursor:pointer}
 .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer;min-height:auto}
 .btn-excel{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:1px solid var(--grn);color:var(--grn);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;min-height:auto}
 .btn-excel:hover{background:color-mix(in srgb,var(--grn) 22%,var(--sur))}
+/* ── STOCK TOGGLE (admin) ── */
+.stk-toggle{display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;min-height:auto}
+.stk-toggle input[type=checkbox]{accent-color:var(--grn);width:15px;height:15px;cursor:pointer;min-height:auto}
+.stk-lbl{font-family:'Nunito',sans-serif;font-size:.74rem;font-weight:800;color:var(--fg2)}
+.stk-inp{width:62px;flex:none!important}
+/* ── STOCK BADGE (producto) ── */
+.prd .stk{font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;color:var(--fg2);background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:1px solid color-mix(in srgb,var(--grn) 25%,var(--bdr));border-radius:6px;padding:2px 6px;pointer-events:none}
+.prd.sin-stock{opacity:.45;pointer-events:none}
+.prd.stock-bajo .stk{background:color-mix(in srgb,var(--yel) 20%,var(--sur));border-color:color-mix(in srgb,var(--yel) 40%,var(--bdr));color:color-mix(in srgb,var(--yel) 80%,var(--fg2))}
 .total-acum{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:2px solid var(--grn);border-radius:var(--r);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .ta-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2)}
 .ta-amt{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--grn)}
@@ -676,17 +685,31 @@ function renderAdminProds(ci){
   const cont = document.getElementById('prods-'+ci);
   cont.innerHTML = '';
   adminCfg.categorias[ci].productos.forEach((p, pi) => {
+    const tieneStock = p.stock !== undefined && p.stock !== null;
     const row = document.createElement('div');
     row.className = 'prod-row';
+    row.style.flexWrap = 'wrap';
     row.innerHTML = `
       <input class="em-inp" type="text" value="${p.emoji}" placeholder="🍕" maxlength="4">
-      <input type="text" value="${p.nombre}" placeholder="Nombre producto" style="flex:1">
+      <input type="text" value="${p.nombre}" placeholder="Nombre producto" style="flex:1;min-width:120px">
       <input class="pr-inp" type="number" value="${p.precio}" placeholder="Precio" min="0" step="100">
+      <label class="stk-toggle" title="Activar control de stock">
+        <input type="checkbox" class="stk-chk" ${tieneStock?'checked':''}>
+        <span class="stk-lbl">Stock</span>
+      </label>
+      <input class="stk-inp" type="number" value="${tieneStock?p.stock:''}" placeholder="0" min="0" step="1" style="${tieneStock?'':'display:none'}">
       <button class="btn-del">✕</button>`;
-    row.querySelector('.em-inp').oninput   = e => { p.emoji  = e.target.value; };
+    row.querySelector('.em-inp').oninput     = e => { p.emoji  = e.target.value; };
     row.querySelectorAll('input')[1].oninput = e => { p.nombre = e.target.value; };
-    row.querySelector('.pr-inp').oninput   = e => { p.precio = parseInt(e.target.value)||0; };
-    row.querySelector('.btn-del').onclick  = () => {
+    row.querySelector('.pr-inp').oninput     = e => { p.precio = parseInt(e.target.value)||0; };
+    const chk   = row.querySelector('.stk-chk');
+    const stkIn = row.querySelector('.stk-inp');
+    chk.onchange = () => {
+      if(chk.checked){ p.stock = 0; stkIn.style.display=''; stkIn.value=''; stkIn.focus(); }
+      else { delete p.stock; stkIn.style.display='none'; }
+    };
+    stkIn.oninput = e => { p.stock = parseInt(e.target.value)||0; };
+    row.querySelector('.btn-del').onclick = () => {
       adminCfg.categorias[ci].productos.splice(pi,1);
       renderAdminProds(ci);
     };
@@ -851,8 +874,14 @@ function renderGrids(){
     cat.productos.forEach(p=>{
       const btn = document.createElement('button');
       btn.className='prd'; btn.id='btn-'+p.id;
-      btn.innerHTML=`<span class="em">${p.emoji}</span><span class="nm">${p.nombre}</span><span class="pr">${fmt(p.precio)}</span>`;
+      const stkHtml = (p.stock !== undefined && p.stock !== null)
+        ? `<span class="stk">${p.stock > 0 ? p.stock+' restantes' : 'Agotado'}</span>` : '';
+      btn.innerHTML=`<span class="em">${p.emoji}</span><span class="nm">${p.nombre}</span><span class="pr">${fmt(p.precio)}</span>${stkHtml}`;
       btn.onclick=()=>agregar(p.id);
+      if(p.stock !== undefined && p.stock !== null){
+        if(p.stock <= 0) btn.classList.add('sin-stock');
+        else if(p.stock <= 3) btn.classList.add('stock-bajo');
+      }
       grid.appendChild(btn);
     });
     cont.appendChild(grid);
@@ -861,9 +890,34 @@ function renderGrids(){
   cont.appendChild(h);
 }
 
+function actualizarStockBtn(id){
+  const p = getProd(id);
+  if(!p || p.stock === undefined || p.stock === null) return;
+  const btn = document.getElementById('btn-'+id);
+  if(!btn) return;
+  const stkEl = btn.querySelector('.stk');
+  if(stkEl) stkEl.textContent = p.stock > 0 ? p.stock+' restantes' : 'Agotado';
+  btn.classList.remove('sin-stock','stock-bajo');
+  if(p.stock <= 0) btn.classList.add('sin-stock');
+  else if(p.stock <= 3) btn.classList.add('stock-bajo');
+}
+
 // CARRITO
-function agregar(id){ carrito[id]=(carrito[id]||0)+1; renderCarrito(); renderBadges(); }
-function cambiarQty(id,d){ const n=(carrito[id]||0)+d; if(n<=0) delete carrito[id]; else carrito[id]=n; renderCarrito(); renderBadges(); }
+function agregar(id){
+  const p = getProd(id);
+  if(p && p.stock !== undefined && p.stock !== null && p.stock <= 0) return;
+  if(p && p.stock !== undefined && p.stock !== null) { p.stock--; actualizarStockBtn(id); guardarStockCfg(); }
+  carrito[id]=(carrito[id]||0)+1; renderCarrito(); renderBadges();
+}
+function cambiarQty(id,d){
+  const p = getProd(id);
+  // si aumenta, verificar stock
+  if(d > 0 && p && p.stock !== undefined && p.stock !== null && p.stock <= 0) return;
+  if(d > 0 && p && p.stock !== undefined && p.stock !== null){ p.stock--; actualizarStockBtn(id); guardarStockCfg(); }
+  if(d < 0 && p && p.stock !== undefined && p.stock !== null){ p.stock++; actualizarStockBtn(id); guardarStockCfg(); }
+  const n=(carrito[id]||0)+d; if(n<=0) delete carrito[id]; else carrito[id]=n; renderCarrito(); renderBadges();
+}
+function guardarStockCfg(){ try{ localStorage.setItem(LS_CFG,JSON.stringify(cfg)); }catch(e){} }
 
 function renderBadges(){
   document.querySelectorAll('.prd').forEach(b=>{ b.classList.remove('incart'); const bdg=b.querySelector('.bdg'); if(bdg) bdg.remove(); });
@@ -901,7 +955,15 @@ function renderCarrito(){
 
 function totalCarrito(){ return Object.entries(carrito).reduce((a,[id,q])=>a+getProd(id).precio*q,0); }
 
-document.getElementById('btn-limp').onclick=()=>{ carrito={}; renderCarrito(); renderBadges(); };
+document.getElementById('btn-limp').onclick=()=>{
+  // reponer stock de todo lo que estaba en el carrito
+  Object.entries(carrito).forEach(([id,q])=>{
+    const p=getProd(id);
+    if(p && p.stock!==undefined && p.stock!==null){ p.stock+=q; actualizarStockBtn(id); }
+  });
+  guardarStockCfg();
+  carrito={}; renderCarrito(); renderBadges();
+};
 
 // MODAL
 document.getElementById('btn-cobr').onclick=()=>{
