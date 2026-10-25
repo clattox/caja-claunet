@@ -1077,7 +1077,15 @@ const CFG_DEFAULT = {
   try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
   if(!cfg || !cfg.categorias || !cfg.categorias.length){ cfg = CFG_DEFAULT; localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
 
-  showView('v-intro');
+  // Restaurar sesión de caja activa (si recargó la página durante un evento)
+  const eventoGuardado = localStorage.getItem('caja_evento_activo');
+  if(eventoGuardado && cfg && cfg.nombre){
+    _eventoActual = eventoGuardado;
+    sbInit();
+    abrirCaja();
+  } else {
+    showView('v-intro');
+  }
   document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 })();
 
@@ -1387,6 +1395,8 @@ function abrirCaja(){
   showView('v-caja');
   // Conectar realtime con el nombre del evento
   if(_sb) sbSuscribir(cfg.nombre || 'evento');
+  // Persistir evento activo para restaurar al recargar
+  try{ localStorage.setItem('caja_evento_activo', cfg.nombre || ''); }catch(e){}
   setTimeout(dibujarQR, 200);
 }
 
@@ -1719,6 +1729,7 @@ function _saludoDinamico(){
 function mostrarSelector(){
   document.getElementById('sel-nombre').textContent  = 'CajaNet';
   document.getElementById('sel-saludo').textContent  = _saludoDinamico();
+  try{ localStorage.removeItem('caja_evento_activo'); }catch(e){}
   showView('v-selector');
 }
 
