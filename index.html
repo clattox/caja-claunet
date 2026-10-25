@@ -781,6 +781,16 @@ body{
         </div>
       </div>
       <div id="pedidos-lista"><div class="pedidos-vacio">Esperando pedidos… 👀</div></div>
+      <div style="display:flex;gap:12px;padding:10px 2px 4px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-size:.68rem;color:var(--fg2);font-weight:700;margin-bottom:4px">📱 Clientes</div>
+          <div id="caja-qr-menu" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.68rem;color:var(--fg2);font-weight:700;margin-bottom:4px">🍳 Cocina</div>
+          <div id="caja-qr-cocina" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+        </div>
+      </div>
     </div>
     <div class="cart-box">
       <div class="cart-hdr">
@@ -1259,6 +1269,7 @@ function abrirCaja(){
   showView('v-caja');
   // Conectar realtime con el nombre del evento
   if(_sb) sbSuscribir(cfg.nombre || 'evento');
+  setTimeout(dibujarQR, 200);
 }
 
 // TABS
@@ -1807,6 +1818,11 @@ function dibujarQR(){
       correctLevel: QRCode.CorrectLevel.M
     });
   } catch(e){} }
+  // QRs en tab pedidos de la caja
+  const elCM = document.getElementById('caja-qr-menu');
+  const elCC = document.getElementById('caja-qr-cocina');
+  if(elCM){ elCM.innerHTML=''; try{ new QRCode(elCM,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,width:80,height:80,colorDark:'#0a1628',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
+  if(elCC){ elCC.innerHTML=''; try{ new QRCode(elCC,{text:`https://caja.claunet.cl?evento=${eventoSlug}&modo=cocina`,width:80,height:80,colorDark:'#1a3a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }catch(e){} }
 }
 
 // ═══════════════════════════════════════
@@ -1896,6 +1912,7 @@ function renderPedidos(){
         <button class="btn-confirmar" onclick="sbConfirmar('${p.id}')">✅ Confirmar y cobrar</button>
         <button class="btn-rechazar" onclick="sbRechazar('${p.id}')">✕</button>
       </div>
+      ${(p.items||[]).some(i=>i.cocina) ? `<button onclick="sbMandarCocina('${p.id}')" style="width:100%;margin-top:6px;padding:8px;border:none;border-radius:8px;background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer">🍳 Mandar a cocina</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -1915,6 +1932,30 @@ function actualizarBadgePedidos(){
     }
   }
   if(badge){ badge.textContent = n; badge.style.display = n > 0 ? 'flex' : 'none'; }
+}
+
+async function sbMandarCocina(id){
+  if(!_sb) return;
+  const p = _pedidos.find(x=>x.id===id);
+  if(!p) return;
+  const itemsCocina = (p.items||[]).filter(i=>i.cocina);
+  if(!itemsCocina.length) return;
+  const btn = document.querySelector(`[onclick="sbMandarCocina('${id}')"]`);
+  if(btn){ btn.textContent='⏳ Enviando…'; btn.disabled=true; }
+  const {error} = await _sb.from('pedidos').insert({
+    evento: _eventoActual,
+    nombre_cliente: p.nombre_cliente,
+    mesa: p.mesa,
+    items: itemsCocina,
+    total: itemsCocina.reduce((a,i)=>a+i.sub,0),
+    estado: 'pendiente',
+    notas: '🍳 Comanda desde caja'
+  });
+  if(btn){
+    btn.textContent = error ? '❌ Error' : '✅ Enviado a cocina';
+    btn.disabled = true;
+    btn.style.opacity = '.6';
+  }
 }
 
 async function sbConfirmar(id){
