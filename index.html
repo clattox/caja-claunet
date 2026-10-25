@@ -72,7 +72,9 @@ button{font-family:inherit;cursor:pointer}
 
 /* ── HISTORIAL ── */
 .hist-hdr{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--fg2);text-transform:uppercase;letter-spacing:.06em;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between}
-.btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer}
+.btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer;min-height:auto}
+.btn-excel{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:1px solid var(--grn);color:var(--grn);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;min-height:auto}
+.btn-excel:hover{background:color-mix(in srgb,var(--grn) 22%,var(--sur))}
 .total-acum{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:2px solid var(--grn);border-radius:var(--r);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .ta-lbl{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2)}
 .ta-amt{font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:900;color:var(--grn)}
@@ -526,7 +528,7 @@ let cfg = null;        // {nombre, fecha, categorias}
 let carrito = {};      // {id: qty}
 let historial = [];
 let ventaNum = 1;
-let tabActivo = '';
+let tabActivo = 'productos';
 
 const fmt = n => '$' + n.toLocaleString('es-CL');
 const getProd = id => { for(const c of cfg.categorias){ const p = c.productos.find(x=>x.id===id); if(p) return p; } };
@@ -800,7 +802,7 @@ document.getElementById('pin-cancel').onclick = () => {
 // ═══════════════════════════════════════
 function abrirCaja(){
   document.getElementById('caja-nombre').textContent = cfg.nombre || 'Caja';
-  tabActivo = cfg.categorias[0].id;
+  tabActivo = 'productos';
   renderTabs();
   renderGrids();
   renderCarrito();
@@ -824,10 +826,16 @@ function renderTabs(){
 }
 function setTab(id){
   tabActivo = id; renderTabs();
-  document.getElementById('caja-grids').hidden = (id==='historial');
-  const hist = document.getElementById('tab-historial');
-  hist.hidden = (id!=='historial');
-  if(id==='historial') renderHistorial();
+  const grids = document.getElementById('caja-grids');
+  const hist  = document.getElementById('tab-historial');
+  if(id === 'historial'){
+    grids.hidden = true;
+    hist.hidden  = false;
+    renderHistorial();
+  } else {
+    grids.hidden = false;
+    hist.hidden  = true;
+  }
 }
 
 // GRIDS — todas las categorías visibles a la vez
@@ -912,13 +920,16 @@ document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementB
 document.getElementById('m-ok').onclick=()=>{
   const ids=Object.keys(carrito); if(!ids.length) return;
   const total=totalCarrito();
-  const desc=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return `${p.emoji}${p.nombre}${q>1?' ×'+q:''}`; }).join(', ');
-  historial.unshift({num:ventaNum++,desc,total});
+  const now=new Date();
+  const hora=now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  const items=ids.map(id=>{ const p=getProd(id),q=carrito[id]; return {emoji:p.emoji,nombre:p.nombre,qty:q,precio:p.precio,sub:p.precio*q}; });
+  const desc=items.map(i=>`${i.emoji}${i.nombre}${i.qty>1?' ×'+i.qty:''}`).join(', ');
+  historial.unshift({num:ventaNum++,desc,total,hora,items});
   try{ localStorage.setItem(LS_HIST,JSON.stringify(historial)); }catch(e){}
   carrito={}; renderCarrito(); renderBadges();
   document.getElementById('modal').hidden=true;
   setTab('historial');
-  setTimeout(()=>setTab(cfg.categorias[0].id),1800);
+  setTimeout(()=>setTab('productos'),1800);
 };
 
 document.getElementById('m-print').onclick=()=>{
@@ -938,10 +949,72 @@ function renderHistorial(){
   if(!historial.length){ sec.innerHTML='<div class="cart-empty" style="padding:28px;text-align:center">Sin ventas aún 🎵</div>'; return; }
   const tot=historial.reduce((a,v)=>a+v.total,0);
   sec.innerHTML=`
-    <div class="hist-hdr"><span>Ventas (${historial.length})</span><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div>
+    <div class="hist-hdr"><span>Ventas (${historial.length})</span><div style="display:flex;gap:8px;align-items:center"><button class="btn-excel" id="btn-excel">📊 Excel</button><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div></div>
     <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-amt">${fmt(tot)}</span></div>
-    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}</span><span class="hi-d">${v.desc}</span><span class="hi-t">${fmt(v.total)}</span></div>`).join('')}`;
+    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}</span><span class="hi-t">${fmt(v.total)}</span></div>`).join('')}`;
   document.getElementById('btn-borrar').onclick=()=>{ historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial(); };
+  document.getElementById('btn-excel').onclick=()=>exportarExcel();
+}
+
+// EXPORTAR EXCEL (CSV descargable con BOM para Excel en español)
+function exportarExcel(){
+  if(!historial.length) return;
+  const bom = '﻿';
+  const sep = ';';
+  const lines = [];
+  // Encabezado del evento
+  lines.push(['Evento', cfg.nombre || ''].join(sep));
+  lines.push(['Fecha', cfg.fecha || ''].join(sep));
+  lines.push(['Exportado', new Date().toLocaleDateString('es-CL')].join(sep));
+  lines.push([]);
+
+  // Resumen por venta
+  lines.push(['#Venta','Hora','Descripción','Total'].join(sep));
+  historial.forEach(v=>{
+    lines.push([v.num, v.hora||'', (v.desc||'').replace(/;/g,','), v.total].join(sep));
+  });
+  lines.push([]);
+
+  // Detalle producto a producto
+  lines.push(['#Venta','Hora','Producto','Cantidad','Precio unit.','Subtotal'].join(sep));
+  historial.forEach(v=>{
+    if(v.items && v.items.length){
+      v.items.forEach(i=>{
+        lines.push([v.num, v.hora||'', (i.nombre||'').replace(/;/g,','), i.qty, i.precio, i.sub].join(sep));
+      });
+    } else {
+      // ventas antiguas sin detalle
+      lines.push([v.num, v.hora||'', (v.desc||'').replace(/;/g,','), '', '', v.total].join(sep));
+    }
+  });
+  lines.push([]);
+
+  // Totales por producto
+  const resumen = {};
+  historial.forEach(v=>{
+    if(v.items) v.items.forEach(i=>{
+      if(!resumen[i.nombre]) resumen[i.nombre]={emoji:i.emoji,qty:0,total:0};
+      resumen[i.nombre].qty  += i.qty;
+      resumen[i.nombre].total += i.sub;
+    });
+  });
+  if(Object.keys(resumen).length){
+    lines.push(['Resumen por producto','','','','',''].join(sep));
+    lines.push(['Producto','Unidades vendidas','Total recaudado'].join(sep));
+    Object.entries(resumen).sort((a,b)=>b[1].total-a[1].total).forEach(([nombre,r])=>{
+      lines.push([(r.emoji+' '+nombre).replace(/;/g,','), r.qty, r.total].join(sep));
+    });
+    lines.push(['TOTAL', '', historial.reduce((a,v)=>a+v.total,0)].join(sep));
+  }
+
+  const csv = bom + lines.map(l=>Array.isArray(l)?l.join(sep):l).join('\r\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `${(cfg.nombre||'caja').replace(/[^a-zA-Z0-9]/g,'_')}_${cfg.fecha||new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
 }
 </script>
 </body>
