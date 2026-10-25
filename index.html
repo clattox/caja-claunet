@@ -1237,7 +1237,8 @@ function accionGuardar(){
     .map(c => ({ ...c, productos: c.productos.filter(p => p.nombre.trim()) }))
     .filter(c => c.productos.length);
   if(!adminCfg.categorias.length){ alert('Agrega al menos una categoría con productos'); return; }
-  cfg = adminCfg;
+  // Preservar slug si ya existía en cfg (viene de Supabase, adminCfg no lo tiene)
+  cfg = { ...adminCfg, slug: adminCfg.slug || cfg?.slug || '' };
   localStorage.setItem(LS_CFG, JSON.stringify(cfg));
   carrito = {};
   abrirCaja();
@@ -1401,8 +1402,11 @@ function abrirCaja(){
   showView('v-caja');
   // Conectar realtime con el nombre del evento
   if(_sb) sbSuscribir(cfg.nombre || 'evento');
-  // Persistir evento activo para restaurar al recargar
-  try{ localStorage.setItem('caja_evento_activo', cfg.nombre || ''); }catch(e){}
+  // Persistir evento activo (nombre) y cfg completo (con slug) para restaurar al recargar
+  try{
+    localStorage.setItem('caja_evento_activo', cfg.nombre || '');
+    localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+  }catch(e){}
   setTimeout(dibujarQR, 200);
 }
 
