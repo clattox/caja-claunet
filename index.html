@@ -1084,14 +1084,30 @@ const CFG_DEFAULT = {
   // NO restaurar si estamos en modo menu, cocina o superadmin — esos modos tienen su propio init
   const eventoGuardado = localStorage.getItem('caja_evento_activo');
   const _urlModo = new URLSearchParams(location.search).get('modo');
-  if(eventoGuardado && cfg && cfg.nombre && !_urlModo){
-    setTimeout(() => {
+  if(eventoGuardado && !_urlModo){
+    setTimeout(async () => {
       try {
-        _eventoActual = eventoGuardado;
         sbInit();
+        // Recargar evento desde Supabase para tener categorías y slug actualizados
+        if(_sb){
+          const {data: evData} = await _sb.from('eventos').select('*')
+            .ilike('nombre', eventoGuardado.trim()).eq('activo', true).single();
+          if(evData){
+            cfg = {
+              nombre: evData.nombre,
+              slug: evData.slug,
+              categorias: evData.categorias || [],
+              pinCaja: evData.pin_caja,
+              pinCocina: evData.pin_cocina,
+            };
+            localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+          }
+        }
+        if(!cfg || !cfg.categorias || !cfg.categorias.length){ showView('v-intro'); return; }
+        _eventoActual = eventoGuardado;
         abrirCaja();
       } catch(e){ showView('v-intro'); }
-    }, 300);
+    }, 400);
   }
 })();
 
