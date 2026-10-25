@@ -1934,7 +1934,7 @@ function renderPedidos(){
         <button onclick="sbMarcarListo('${p.id}')" style="padding:7px 12px;border:none;border-radius:8px;background:var(--yel);color:#1a1008;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer">🔔 Listo</button>
         <button onclick="sbRechazar('${p.id}')" style="padding:7px 10px;border:none;border-radius:8px;background:var(--sur);color:var(--fg2);font-size:.78rem;cursor:pointer">✕</button>
       </div>`}
-      ${p.estado === 'pendiente' && (p.items||[]).some(i=>i.cocina) ? `<div style="margin-top:6px;padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--grn) 12%,var(--sur));color:var(--grn);font-size:.75rem;font-weight:700">🍳 Tiene ítems de cocina — se envían al confirmar</div>` : ''}
+      ${p.estado === 'pendiente' && (p.items||[]).some(i=>i.cocina) ? `<div style="margin-top:6px;padding:5px 8px;border-radius:8px;background:color-mix(in srgb,var(--grn) 12%,var(--sur));color:var(--grn);font-size:.75rem;font-weight:700">🍳 Con comida — cocina recibe al confirmar</div>` : ''}
     </div>`;
   }).join('');
 }
