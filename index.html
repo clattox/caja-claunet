@@ -77,6 +77,22 @@ button{font-family:inherit;cursor:pointer}
 .hi-d{font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:600;color:var(--fg);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hi-t{font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:900;color:var(--grn);white-space:nowrap}
 
+/* ── MODAL PIN ── */
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.pin-overlay[hidden]{display:none}
+.pin-modal{background:var(--sur);border-radius:22px;padding:28px 24px;width:100%;max-width:320px;text-align:center;border:1px solid var(--bdr);box-shadow:0 20px 60px rgba(0,0,0,.22);animation:modalIn .2s ease-out both}
+.pin-modal h3{font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900;margin:8px 0 4px}
+.pin-modal p{font-size:.82rem;color:var(--fg2);margin-bottom:18px}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bdr);background:var(--bg);transition:background .15s,border-color .15s}
+.pin-dot.filled{background:var(--acc);border-color:var(--acc)}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pin-key{background:var(--bg);border:1px solid var(--bdr);border-radius:12px;padding:14px 0;font-family:'Nunito',sans-serif;font-size:1.3rem;font-weight:800;color:var(--fg);transition:background .12s,transform .1s}
+.pin-key:active{transform:scale(.94);background:color-mix(in srgb,var(--acc) 12%,var(--bg))}
+.pin-key.del{font-size:1rem;color:var(--fg2)}
+.pin-err{color:var(--acc);font-size:.8rem;font-weight:700;min-height:1.2em;margin-bottom:6px}
+.pin-cancel{background:none;border:none;color:var(--fg2);font-size:.82rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer;min-height:auto;padding:4px}
+
 /* ── MODAL COBRO ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .overlay[hidden]{display:none}
@@ -394,6 +410,10 @@ body{
       <label>Fecha</label>
       <input type="date" id="adm-fecha">
     </div>
+    <div class="form-group">
+      <label>PIN de acceso al admin (4 dígitos)</label>
+      <input type="number" id="adm-pin" placeholder="1234" maxlength="4" style="max-width:140px">
+    </div>
     <h2 style="margin-top:16px">Categorías y productos</h2>
     <div id="adm-cats"></div>
     <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
@@ -430,6 +450,36 @@ body{
       <button class="btn-limp" id="btn-limp">🗑️ Limpiar</button>
       <button class="btn-cobr" id="btn-cobr" disabled>✅ Cobrar</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ MODAL PIN ADMIN ══ -->
+<div class="pin-overlay" id="pin-overlay" hidden>
+  <div class="pin-modal">
+    <div style="font-size:2.2rem">🔐</div>
+    <h3>Acceso Admin</h3>
+    <p>Ingresa el PIN de 4 dígitos</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-err" id="pin-err"></div>
+    <div class="pin-grid">
+      <button class="pin-key" data-k="1">1</button>
+      <button class="pin-key" data-k="2">2</button>
+      <button class="pin-key" data-k="3">3</button>
+      <button class="pin-key" data-k="4">4</button>
+      <button class="pin-key" data-k="5">5</button>
+      <button class="pin-key" data-k="6">6</button>
+      <button class="pin-key" data-k="7">7</button>
+      <button class="pin-key" data-k="8">8</button>
+      <button class="pin-key" data-k="9">9</button>
+      <button class="pin-key" data-k="0" style="grid-column:2">0</button>
+      <button class="pin-key del" id="pin-del">⌫</button>
+    </div>
+    <button class="pin-cancel" id="pin-cancel">Cancelar</button>
   </div>
 </div>
 
@@ -559,6 +609,7 @@ function abrirAdmin(cancelable){
   adminCfg = cfg ? JSON.parse(JSON.stringify(cfg)) : { nombre:'', fecha: new Date().toISOString().slice(0,10), categorias:[] };
   document.getElementById('adm-nombre').value = adminCfg.nombre || '';
   document.getElementById('adm-fecha').value  = adminCfg.fecha  || '';
+  document.getElementById('adm-pin').value    = getPin();
   document.getElementById('btn-admin-cancel').style.display = cancelable ? '' : 'none';
   renderAdminCats();
   showView('v-admin');
@@ -638,6 +689,8 @@ document.getElementById('btn-guardar').onclick = () => {
   const nombre = document.getElementById('adm-nombre').value.trim();
   const fecha  = document.getElementById('adm-fecha').value;
   if(!nombre){ alert('Escribe el nombre del evento'); return; }
+  const pinVal = document.getElementById('adm-pin').value.trim();
+  if(pinVal && /^\d{4}$/.test(pinVal)) localStorage.setItem(LS_PIN, pinVal);
   // Snapshot labels from DOM antes de filtrar
   document.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
   adminCfg.nombre = nombre;
@@ -654,7 +707,57 @@ document.getElementById('btn-guardar').onclick = () => {
 };
 
 document.getElementById('btn-admin-cancel').onclick = () => { if(cfg) abrirCaja(); };
-document.getElementById('btn-ir-admin2').onclick    = () => abrirAdmin(true);
+document.getElementById('btn-ir-admin2').onclick    = () => pedirPin();
+
+// ═══════════════════════════════════════
+//  PIN ADMIN
+// ═══════════════════════════════════════
+const LS_PIN = 'caja_pin';
+const PIN_DEFAULT = '1234';
+let pinBuffer = '';
+
+function getPin(){ return localStorage.getItem(LS_PIN) || PIN_DEFAULT; }
+
+function pedirPin(){
+  pinBuffer = '';
+  actualizarDots();
+  document.getElementById('pin-err').textContent = '';
+  document.getElementById('pin-overlay').hidden = false;
+}
+
+function actualizarDots(){
+  for(let i=0;i<4;i++){
+    document.getElementById('pd'+i).classList.toggle('filled', i < pinBuffer.length);
+  }
+}
+
+document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += b.dataset.k;
+  actualizarDots();
+  if(pinBuffer.length === 4){
+    setTimeout(()=>{
+      if(pinBuffer === getPin()){
+        document.getElementById('pin-overlay').hidden = true;
+        abrirAdmin(true);
+      } else {
+        document.getElementById('pin-err').textContent = 'PIN incorrecto';
+        pinBuffer = '';
+        actualizarDots();
+      }
+    }, 120);
+  }
+});
+
+document.getElementById('pin-del').onclick = () => {
+  pinBuffer = pinBuffer.slice(0,-1);
+  actualizarDots();
+  document.getElementById('pin-err').textContent = '';
+};
+
+document.getElementById('pin-cancel').onclick = () => {
+  document.getElementById('pin-overlay').hidden = true;
+};
 
 // ═══════════════════════════════════════
 //  CAJA
