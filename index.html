@@ -75,6 +75,13 @@ button{font-family:inherit;cursor:pointer}
 .btn-borrar{background:none;border:none;color:var(--fg2);font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700;text-decoration:underline;cursor:pointer;min-height:auto}
 .btn-excel{background:color-mix(in srgb,var(--grn) 12%,var(--sur));border:1px solid var(--grn);color:var(--grn);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;min-height:auto}
 .btn-excel:hover{background:color-mix(in srgb,var(--grn) 22%,var(--sur))}
+.btn-cierre-mini{background:color-mix(in srgb,var(--acc) 10%,var(--sur));border:1px solid var(--acc);color:var(--acc);border-radius:8px;padding:4px 10px;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;cursor:pointer;min-height:auto}
+.btn-cierre-mini:hover{background:color-mix(in srgb,var(--acc) 20%,var(--sur))}
+.cierre-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200}
+.cierre-modal{background:var(--sur);border-radius:20px;padding:28px 22px;width:min(92vw,380px);max-height:88vh;overflow-y:auto}
+.cierre-modal h2{font-family:'Nunito',sans-serif;font-size:1.25rem;font-weight:900;margin-bottom:6px;text-align:center}
+.cierre-subtitle{font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--fg2);text-align:center;margin-bottom:16px}
+.mbtn-cierre-close{width:100%;padding:13px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg2);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;margin-top:10px}
 /* ── MEDIO DE PAGO ── */
 .pago-tag{font-family:'Nunito',sans-serif;font-size:.65rem;font-weight:800;border-radius:6px;padding:2px 6px;white-space:nowrap}
 .pago-tag.ef{background:color-mix(in srgb,var(--grn) 14%,var(--sur));color:var(--grn);border:1px solid color-mix(in srgb,var(--grn) 30%,var(--bdr))}
@@ -241,7 +248,20 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .mrow{gap:12px;align-items:flex-start}.mrow span:first-child{overflow-wrap:anywhere}
 .mbtn{min-height:52px;margin-bottom:10px;border-radius:13px;padding:14px 16px}
 .mbtn-ef{background:var(--grn);color:#fff;border:none!important}.mbtn-ef:hover{filter:brightness(1.06)}
+.mbtn-ef.sel{outline:3px solid var(--yel);outline-offset:2px}
 .mbtn-tr{background:color-mix(in srgb,var(--acc) 12%,var(--sur));color:var(--acc);border:2px solid var(--acc)!important}.mbtn-tr:hover{background:color-mix(in srgb,var(--acc) 20%,var(--sur))}
+.mbtn-tr.sel{outline:3px solid var(--yel);outline-offset:2px}
+.mbtn-cobrado{background:var(--grn);color:#fff;border:none!important}.mbtn-cobrado:hover{filter:brightness(1.06)}
+/* ── CIERRE DE CAJA ── */
+.btn-cierre{width:100%;padding:14px;border-radius:var(--r);border:2px solid var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--sur));color:var(--acc);font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;margin-top:6px}
+.btn-cierre:hover{background:color-mix(in srgb,var(--acc) 16%,var(--sur))}
+.cierre-card{background:var(--sur);border-radius:20px;border:2px solid var(--bdr);padding:22px 20px;margin-top:10px}
+.cierre-card h3{font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;margin-bottom:14px;text-align:center}
+.cierre-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-family:'Nunito',sans-serif}
+.cierre-row:last-child{border-bottom:none;font-size:1.05rem;font-weight:900;padding-top:12px}
+.cierre-lbl{font-size:.88rem;font-weight:700;color:var(--fg2)}
+.cierre-amt{font-size:1rem;font-weight:900;color:var(--fg)}
+.cierre-amt.grn{color:var(--grn)}.cierre-amt.acc{color:var(--acc)}
 .mbtn-print{border-color:var(--yel)!important;color:var(--fg);background:color-mix(in srgb,var(--yel) 12%,var(--sur))}
 .mbtn-back{margin-bottom:0}
 .admin-wrap{max-width:900px;padding:24px 18px 32px}
@@ -448,6 +468,13 @@ body{
     <div id="adm-cats"></div>
     <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
     <button class="btn-save" id="btn-guardar">💾 Guardar y cobrar</button>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--bdr)">
+      <div style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);margin-bottom:8px">🔗 Link de la caja</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <code style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:.82rem;color:var(--fg)">caja.claunet.cl</code>
+        <div id="adm-qr" style="width:100px;height:100px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -485,6 +512,23 @@ body{
 </div>
 
 <!-- ══ MODAL PIN ADMIN ══ -->
+<!-- MODAL CIERRE DE CAJA -->
+<div class="cierre-overlay" id="cierre-overlay" hidden>
+  <div class="cierre-modal">
+    <div style="font-size:2.4rem;text-align:center;margin-bottom:4px">🏁</div>
+    <h2>Cierre de Caja</h2>
+    <div class="cierre-subtitle" id="cierre-fecha"></div>
+    <div class="cierre-card">
+      <div class="cierre-row"><span class="cierre-lbl">N° de ventas</span><span class="cierre-amt" id="cierre-nventas">—</span></div>
+      <div class="cierre-row"><span class="cierre-lbl">💵 Efectivo</span><span class="cierre-amt grn" id="cierre-ef">—</span></div>
+      <div class="cierre-row"><span class="cierre-lbl">📲 Transferencia</span><span class="cierre-amt grn" id="cierre-tr">—</span></div>
+      <div class="cierre-row"><span class="cierre-lbl">💰 Total</span><span class="cierre-amt acc" id="cierre-tot">—</span></div>
+    </div>
+    <button class="mbtn mbtn-cobrado" style="margin-top:14px" id="cierre-excel">📊 Exportar Excel</button>
+    <button class="mbtn-cierre-close" id="cierre-close">Cerrar</button>
+  </div>
+</div>
+
 <div class="pin-overlay" id="pin-overlay" hidden>
   <div class="pin-modal">
     <div style="font-size:2.2rem">🔐</div>
@@ -521,11 +565,25 @@ body{
     <h2>¡A cobrar!</h2>
     <div class="mtotal" id="m-total"></div>
     <div class="mitems" id="m-items"></div>
+    <!-- Nota opcional -->
+    <input type="text" id="m-nota" placeholder="📝 Nota (opcional)" maxlength="60" style="width:100%;padding:10px 13px;border-radius:11px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-family:'Nunito Sans',sans-serif;font-size:.9rem;margin-bottom:12px">
     <p style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);margin-bottom:10px">¿Cómo paga?</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <button class="mbtn mbtn-ef" id="m-ef">💵 Efectivo</button>
       <button class="mbtn mbtn-tr" id="m-tr">📲 Transferencia</button>
     </div>
+    <!-- Vuelto (solo visible al elegir efectivo) -->
+    <div id="m-vuelto-box" hidden style="background:color-mix(in srgb,var(--grn) 10%,var(--sur));border:1px solid color-mix(in srgb,var(--grn) 25%,var(--bdr));border-radius:13px;padding:12px 14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <label style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);white-space:nowrap">💵 Recibe</label>
+        <input type="number" id="m-recibe" placeholder="0" min="0" step="500" style="flex:1;padding:8px 12px;border-radius:9px;border:1px solid var(--bdr);background:var(--sur);color:var(--fg);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;min-height:auto">
+        <div style="text-align:right;min-width:90px">
+          <div style="font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;color:var(--fg2)">Vuelto</div>
+          <div id="m-vuelto-amt" style="font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900;color:var(--grn)">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="mbtn mbtn-cobrado" id="m-cobrado" hidden>✅ Cobrado — Nueva venta</button>
     <button class="mbtn mbtn-print" id="m-print">🖨️ Imprimir ticket</button>
     <button class="mbtn mbtn-back" id="m-back">← Volver al pedido</button>
   </div>
@@ -654,6 +712,7 @@ function abrirAdmin(cancelable){
   document.getElementById('btn-admin-cancel').style.display = cancelable ? '' : 'none';
   renderAdminCats();
   showView('v-admin');
+  setTimeout(dibujarQR, 150);
 }
 
 function renderAdminCats(){
@@ -1012,8 +1071,45 @@ document.getElementById('btn-cobr').onclick=()=>{
   document.getElementById('modal').hidden=false;
 };
 
-document.getElementById('m-back').onclick=()=>{ document.getElementById('modal').hidden=true; };
-document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')) document.getElementById('modal').hidden=true; };
+document.getElementById('m-back').onclick=()=>{ document.getElementById('modal').hidden=true; resetModalPago(); };
+document.getElementById('modal').onclick=e=>{ if(e.target===document.getElementById('modal')){ document.getElementById('modal').hidden=true; resetModalPago(); } };
+
+// Vuelto
+let _pagoSel = null;
+function resetModalPago(){
+  _pagoSel = null;
+  document.getElementById('m-vuelto-box').hidden = true;
+  document.getElementById('m-cobrado').hidden = true;
+  document.getElementById('m-recibe').value = '';
+  document.getElementById('m-vuelto-amt').textContent = '—';
+  document.getElementById('m-nota').value = '';
+  document.getElementById('m-ef').classList.remove('sel');
+  document.getElementById('m-tr').classList.remove('sel');
+}
+document.getElementById('m-ef').onclick=()=>{
+  _pagoSel = 'efectivo';
+  document.getElementById('m-ef').classList.add('sel');
+  document.getElementById('m-tr').classList.remove('sel');
+  document.getElementById('m-vuelto-box').hidden = false;
+  document.getElementById('m-cobrado').hidden = false;
+  document.getElementById('m-recibe').focus();
+};
+document.getElementById('m-tr').onclick=()=>{
+  _pagoSel = 'transferencia';
+  document.getElementById('m-tr').classList.add('sel');
+  document.getElementById('m-ef').classList.remove('sel');
+  document.getElementById('m-vuelto-box').hidden = true;
+  document.getElementById('m-cobrado').hidden = false;
+};
+document.getElementById('m-recibe').oninput=()=>{
+  const recibe = parseInt(document.getElementById('m-recibe').value)||0;
+  const total  = totalCarrito();
+  const vuelto = recibe - total;
+  const el = document.getElementById('m-vuelto-amt');
+  el.textContent = recibe ? fmt(Math.max(0,vuelto)) : '—';
+  el.style.color = vuelto < 0 ? 'var(--acc)' : 'var(--grn)';
+};
+document.getElementById('m-cobrado').onclick=()=>{ if(_pagoSel) registrarVenta(_pagoSel); };
 
 function registrarVenta(pago){
   const ids=Object.keys(carrito); if(!ids.length) return;
@@ -1052,17 +1148,18 @@ function renderHistorial(){
   const totTr= historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.total,0);
   const pagoTag = p => p==='efectivo'?'<span class="pago-tag ef">💵 Efectivo</span>':p==='transferencia'?'<span class="pago-tag tr">📲 Transfer</span>':'';
   sec.innerHTML=`
-    <div class="hist-hdr"><span>Ventas (${historial.length})</span><div style="display:flex;gap:8px;align-items:center"><button class="btn-excel" id="btn-excel">📊 Excel</button><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div></div>
+    <div class="hist-hdr"><span>Ventas (${historial.length})</span><div style="display:flex;gap:8px;align-items:center"><button class="btn-cierre-mini" id="btn-cierre">🏁 Cierre</button><button class="btn-excel" id="btn-excel">📊 Excel</button><button class="btn-borrar" id="btn-borrar">Borrar todo</button></div></div>
     <div class="total-acum"><span class="ta-lbl">💰 Total recaudado</span><span class="ta-amt">${fmt(tot)}</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <div class="pago-resumen"><span class="pr-lbl">💵 Efectivo</span><span class="pr-amt">${fmt(totEf)}</span></div>
       <div class="pago-resumen tr"><span class="pr-lbl">📲 Transfer</span><span class="pr-amt">${fmt(totTr)}</span></div>
     </div>
-    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="hi-t">${fmt(v.total)}</span>${pagoTag(v.pago)}</div></div>`).join('')}`;
+    ${historial.map(v=>`<div class="hitem"><span class="hi-n">#${v.num}${v.hora?' · '+v.hora:''}</span><span class="hi-d">${v.desc}${v.nota?'<br><span style="font-size:.75rem;color:var(--fg2);font-style:italic">📝 '+v.nota+'</span>':''}</span><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><span class="hi-t">${fmt(v.total)}</span>${pagoTag(v.pago)}</div></div>`).join('')}`;
   document.getElementById('btn-borrar').onclick=()=>pedirPinAccion(()=>{
     historial=[]; ventaNum=1; try{localStorage.removeItem(LS_HIST);}catch(e){} renderHistorial();
   });
   document.getElementById('btn-excel').onclick=()=>exportarExcel();
+  document.getElementById('btn-cierre').onclick=()=>mostrarCierre();
 }
 
 // EXPORTAR EXCEL (CSV descargable con BOM para Excel en español)
@@ -1131,6 +1228,46 @@ function exportarExcel(){
   a.download = `${(cfg.nombre||'caja').replace(/[^a-zA-Z0-9]/g,'_')}_${cfg.fecha||new Date().toISOString().slice(0,10)}.csv`;
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+// ── CIERRE DE CAJA ──────────────────────────────────────────────────────────
+function mostrarCierre(){
+  if(!historial.length) return;
+  const tot   = historial.reduce((a,v)=>a+v.total,0);
+  const totEf = historial.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.total,0);
+  const totTr = historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.total,0);
+  document.getElementById('cierre-fecha').textContent = cfg.nombre + (cfg.fecha ? ' · '+cfg.fecha : '');
+  document.getElementById('cierre-nventas').textContent = historial.length;
+  document.getElementById('cierre-ef').textContent  = fmt(totEf);
+  document.getElementById('cierre-tr').textContent  = fmt(totTr);
+  document.getElementById('cierre-tot').textContent = fmt(tot);
+  document.getElementById('cierre-overlay').hidden = false;
+}
+document.getElementById('cierre-close').onclick  = ()=>{ document.getElementById('cierre-overlay').hidden=true; };
+document.getElementById('cierre-excel').onclick  = ()=>{ exportarExcel(); document.getElementById('cierre-overlay').hidden=true; };
+document.getElementById('cierre-overlay').onclick = e=>{ if(e.target===document.getElementById('cierre-overlay')) document.getElementById('cierre-overlay').hidden=true; };
+
+// ── QR DEL LINK ──────────────────────────────────────────────────────────────
+// Micro QR usando qrcode-generator desde cdnjs
+(function loadQR(){
+  const s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload = dibujarQR;
+  document.head.appendChild(s);
+})();
+
+function dibujarQR(){
+  const el = document.getElementById('adm-qr');
+  if(!el || typeof QRCode === 'undefined') return;
+  el.innerHTML = ''; // limpiar previo
+  try {
+    new QRCode(el, {
+      text: 'https://caja.claunet.cl',
+      width: 100, height: 100,
+      colorDark: '#1a1008', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e){}
 }
 </script>
 </body>
