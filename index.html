@@ -2512,7 +2512,7 @@ async function saCargarEventos(){
         <div class="sa-badge ${ev.activo?'on':'off'}"></div>
         <div style="flex:1;min-width:0">
           <div class="sa-evento-nombre">${ev.nombre}</div>
-          <div class="sa-evento-slug">caja.claunet.cl?evento=${slug}</div>
+          <a href="?evento=${encodeURIComponent(slug)}&modo=menu" target="_blank" class="sa-evento-slug" style="color:var(--acc);text-decoration:none">caja.claunet.cl?evento=${slug} ↗</a>
         </div>
       </div>
       <div class="sa-evento-meta">
@@ -2533,7 +2533,6 @@ async function saCargarEventos(){
         <button onclick="saToggleCocina('${ev.id}',${!!ev.cocina_activa})" style="flex:1;padding:7px;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer;background:${ev.cocina_activa!==false?'color-mix(in srgb,var(--grn) 20%,var(--sur))':'var(--sur)'};color:${ev.cocina_activa!==false?'var(--grn)':'var(--fg2)'}">
           🍳 Cocina ${ev.cocina_activa!==false?'✓ ON':'✗ OFF'}
         </button>
-        ${slug?`<a href="?evento=${encodeURIComponent(slug)}&modo=menu" target="_blank" title="Abrir cliente" style="display:flex;align-items:center;justify-content:center;padding:7px 10px;border-radius:8px;background:var(--sur);color:var(--fg2);font-size:.85rem;text-decoration:none">↗</a>`:''}
       </div>
     </div>`;
   }).join('');
