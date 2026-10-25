@@ -1260,6 +1260,12 @@ function accionGuardar(){
   // Preservar slug si ya existía en cfg (viene de Supabase, adminCfg no lo tiene)
   cfg = { ...adminCfg, slug: adminCfg.slug || cfg?.slug || '' };
   localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+  // Sincronizar categorías a Supabase si hay evento activo
+  if(_sb && _eventoActual){
+    _sb.from('eventos').update({ categorias: cfg.categorias })
+      .ilike('nombre', _eventoActual.trim())
+      .then(({error}) => { if(error) console.warn('[cfg] error sincronizando categorías:', error.message); else console.log('[cfg] categorías sincronizadas a Supabase'); });
+  }
   carrito = {};
   abrirCaja();
 }
