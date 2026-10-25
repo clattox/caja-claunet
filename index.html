@@ -445,6 +445,16 @@ button:active:not(:disabled){transform:scale(.98)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 
+/* ══ SUPERADMIN ══ */
+.sa-evento-card{background:var(--sur);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--bdr)}
+.sa-evento-card .sa-badge{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sa-evento-card .sa-badge.on{background:var(--grn)}
+.sa-evento-card .sa-badge.off{background:var(--fg2)}
+.sa-evento-info{flex:1;min-width:0}
+.sa-evento-nombre{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sa-evento-slug{font-size:.72rem;color:var(--fg2);margin-top:2px}
+.sa-cat-editor{background:var(--bg);border-radius:10px;padding:10px 12px;border:1px solid var(--bdr)}
+
 /* ══ VISTA COCINA ══ */
 #v-cocina{background:var(--bg)}
 .cocina-hdr{background:#1a3a1a;color:#fff;padding:14px 16px;text-align:center;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between}
@@ -695,6 +705,70 @@ body{
       <h1>Caja Rápida</h1>
       <p>Configura el evento y los productos antes de comenzar a cobrar.</p>
       <button class="btn-setup" id="btn-ir-admin">⚙️ Configurar evento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VISTA: SUPERADMIN ══ -->
+<div class="view" id="v-superadmin">
+  <div class="hdr" style="background:linear-gradient(90deg,#4a0a8a,#1a0a4a)">
+    <div class="hdr-left">
+      <h1>⚡ SuperAdmin</h1>
+      <p id="sa-subtitle">ClauNet · Gestión de eventos</p>
+    </div>
+    <button class="hdr-btn" onclick="showView('v-login')">✕ Salir</button>
+  </div>
+  <div class="content" style="padding-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--fg)">Eventos</div>
+      <button onclick="saNuevoEvento()" style="padding:8px 14px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer">+ Nuevo evento</button>
+    </div>
+    <div id="sa-lista" style="display:flex;flex-direction:column;gap:10px">
+      <div style="text-align:center;padding:40px;color:var(--fg2);font-size:.85rem">Cargando eventos…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL EDITOR EVENTO ══ -->
+<div id="sa-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);overflow-y:auto">
+  <div style="background:var(--sur);border-radius:16px;margin:20px auto;max-width:520px;padding:20px;position:relative">
+    <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;margin-bottom:16px" id="sa-modal-titulo">Nuevo evento</div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:var(--fg2);display:block;margin-bottom:4px">Nombre del evento</label>
+        <input id="sa-nombre" type="text" placeholder="Ej: 🎭 Peña Cañete 2026" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.9rem;font-family:inherit" oninput="saAutoSlug()">
+      </div>
+      <div>
+        <label style="font-size:.75rem;font-weight:700;color:var(--fg2);display:block;margin-bottom:4px">Slug (ID en URLs)</label>
+        <input id="sa-slug" type="text" placeholder="pena-canete-2026" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.9rem;font-family:inherit;letter-spacing:.02em">
+        <div style="font-size:.7rem;color:var(--fg2);margin-top:3px">URL: caja.claunet.cl?evento=<span id="sa-slug-preview" style="color:var(--acc)">…</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:.75rem;font-weight:700;color:var(--fg2);display:block;margin-bottom:4px">PIN caja</label>
+          <input id="sa-pin-caja" type="number" placeholder="1234" maxlength="4" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.9rem;font-family:inherit">
+        </div>
+        <div>
+          <label style="font-size:.75rem;font-weight:700;color:var(--fg2);display:block;margin-bottom:4px">PIN cocina</label>
+          <input id="sa-pin-cocina" type="number" placeholder="0000" maxlength="4" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.9rem;font-family:inherit">
+        </div>
+      </div>
+
+      <!-- Categorías y productos -->
+      <div style="border-top:1px solid var(--bdr);padding-top:12px;margin-top:4px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:.82rem;font-weight:900;color:var(--fg)">🗂 Categorías y productos</div>
+          <button onclick="saAgregarCategoria()" style="padding:5px 10px;border:none;border-radius:8px;background:var(--acc);color:#fff;font-size:.75rem;font-weight:900;cursor:pointer">+ Categoría</button>
+        </div>
+        <div id="sa-cats" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="saGuardarEvento()" style="flex:1;padding:12px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;cursor:pointer">💾 Guardar evento</button>
+        <button onclick="document.getElementById('sa-modal').style.display='none'" style="padding:12px 16px;border:none;border-radius:10px;background:var(--sur);color:var(--fg2);font-size:.9rem;cursor:pointer">✕</button>
+      </div>
+      <div id="sa-error" style="display:none;padding:8px 12px;border-radius:8px;background:#fee;color:#c00;font-size:.8rem"></div>
     </div>
   </div>
 </div>
@@ -1222,6 +1296,15 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
           document.getElementById('pin-err').textContent = 'PIN incorrecto';
           pinBuffer = ''; actualizarDots();
         }
+      } else if(_pinDestinoSelector === 'superadmin'){
+        if(pinBuffer === SA_PIN){
+          document.getElementById('pin-overlay').hidden = true;
+          _pinDestinoSelector = null;
+          iniciarSuperAdmin();
+        } else {
+          document.getElementById('pin-err').textContent = 'PIN incorrecto';
+          pinBuffer = ''; actualizarDots();
+        }
       } else if(_pinDestinoSelector === 'caja'){
         if(pinBuffer === getPin() || pinBuffer === getSPin()){
           document.getElementById('pin-overlay').hidden = true;
@@ -1240,6 +1323,10 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
           document.getElementById('pin-err').textContent = 'PIN incorrecto';
           pinBuffer = ''; actualizarDots();
         }
+      } else if(pinBuffer === SA_PIN){
+        nivelAdmin = 2;
+        document.getElementById('pin-overlay').hidden = true;
+        iniciarSuperAdmin();
       } else if(pinBuffer === getSPin()){
         nivelAdmin = 2;
         document.getElementById('pin-overlay').hidden = true;
@@ -2209,18 +2296,212 @@ function cocinaListo(id){
 sbInit();
 
 // Detectar modo=menu en la URL
-(function(){
+(async function(){
   const params = new URLSearchParams(location.search);
   const modo = params.get('modo');
   const eventoParam = params.get('evento');
+
+  if(modo === 'superadmin'){
+    sbInit();
+    // pedir PIN maestro
+    _pinDestinoSelector = 'superadmin';
+    document.getElementById('pin-overlay').hidden = false;
+    document.getElementById('pin-overlay').querySelector('h3').textContent = '⚡ SuperAdmin';
+    document.getElementById('pin-overlay').querySelector('p').textContent  = 'Ingresa el PIN maestro';
+    actualizarDots();
+    return;
+  }
+
   if(modo === 'menu' && eventoParam){
-    const saved = (() => { try{ return JSON.parse(localStorage.getItem('caja_cfg')); }catch(e){ return null; } })();
-    if(saved){ cfg = saved; }
-    iniciarModoMenu(eventoParam);
+    sbInit();
+    // Intentar cargar config del evento desde Supabase
+    const slug = decodeURIComponent(eventoParam);
+    const {data} = await _sb.from('eventos').select('nombre,categorias,pin_caja,pin_cocina').eq('slug', slug).eq('activo',true).single();
+    if(data){
+      cfg = { nombre: data.nombre, categorias: data.categorias || [], pinCaja: data.pin_caja, pinCocina: data.pin_cocina };
+    } else {
+      // fallback a localStorage
+      const saved = (() => { try{ return JSON.parse(localStorage.getItem('caja_cfg')); }catch(e){ return null; } })();
+      if(saved){ cfg = saved; }
+    }
+    iniciarModoMenu(slug);
   } else if(modo === 'cocina' && eventoParam){
     iniciarModoCocina(eventoParam);
   }
 })();
+
+// ══════════════════════════════════════════════
+// SUPERADMIN — gestión de eventos en Supabase
+// ══════════════════════════════════════════════
+
+const SA_PIN = '7731'; // PIN maestro superadmin (solo Claudio)
+let _saEventos = [];
+let _saEditId  = null; // null = nuevo, uuid = editar
+let _saCats    = [];   // categorías del evento en edición
+
+// Acceso: desde el PIN overlay cuando nivel === 2 ya existe
+// Agregamos entrada directa: ?modo=superadmin
+function iniciarSuperAdmin(){
+  if(!_sb){ sbInit(); }
+  showView('v-superadmin');
+  saCargarEventos();
+}
+
+async function saCargarEventos(){
+  const lista = document.getElementById('sa-lista');
+  lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--fg2);font-size:.85rem">Cargando…</div>';
+  // Necesitamos ver todos los eventos (activos e inactivos) — usamos .neq para traer todo
+  const {data, error} = await _sb.from('eventos').select('id,nombre,slug,activo,pin_caja,pin_cocina').order('created_at',{ascending:false});
+  if(error){
+    lista.innerHTML = `<div style="color:#c00;padding:16px;font-size:.82rem">Error: ${error.message}<br><br><small>¿Creaste la tabla eventos en Supabase?</small></div>`;
+    return;
+  }
+  _saEventos = data || [];
+  if(!_saEventos.length){
+    lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--fg2);font-size:.85rem">No hay eventos aún. ¡Crea el primero!</div>';
+    return;
+  }
+  lista.innerHTML = _saEventos.map(ev => `
+    <div class="sa-evento-card">
+      <div class="sa-badge ${ev.activo?'on':'off'}"></div>
+      <div class="sa-evento-info">
+        <div class="sa-evento-nombre">${ev.nombre}</div>
+        <div class="sa-evento-slug">/${ev.slug} · PIN caja: ${ev.pin_caja}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick="saEditarEvento('${ev.id}')" style="padding:6px 10px;border:none;border-radius:8px;background:var(--acc);color:#fff;font-size:.75rem;font-weight:900;cursor:pointer">✏️</button>
+        <button onclick="saToggleActivo('${ev.id}',${ev.activo})" style="padding:6px 10px;border:none;border-radius:8px;background:${ev.activo?'var(--grn)':'var(--sur)'};color:${ev.activo?'#fff':'var(--fg2)'};font-size:.75rem;font-weight:900;cursor:pointer">${ev.activo?'✓ Activo':'○ Inactivo'}</button>
+        <button onclick="saEliminarEvento('${ev.id}','${ev.nombre.replace(/'/g,"\'")}')" style="padding:6px 10px;border:none;border-radius:8px;background:var(--sur);color:#e53;font-size:.75rem;font-weight:900;cursor:pointer">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function saNuevoEvento(){
+  _saEditId = null;
+  _saCats = [{nombre:'General', emoji:'🛒', cocina:false, productos:[]}];
+  document.getElementById('sa-nombre').value = '';
+  document.getElementById('sa-slug').value   = '';
+  document.getElementById('sa-slug-preview').textContent = '…';
+  document.getElementById('sa-pin-caja').value   = '1234';
+  document.getElementById('sa-pin-cocina').value = '0000';
+  document.getElementById('sa-modal-titulo').textContent = 'Nuevo evento';
+  document.getElementById('sa-error').style.display = 'none';
+  saRenderCats();
+  document.getElementById('sa-modal').style.display = 'block';
+}
+
+async function saEditarEvento(id){
+  const {data, error} = await _sb.from('eventos').select('*').eq('id',id).single();
+  if(error || !data) return;
+  _saEditId = id;
+  _saCats   = JSON.parse(JSON.stringify(data.categorias || []));
+  document.getElementById('sa-nombre').value     = data.nombre;
+  document.getElementById('sa-slug').value       = data.slug;
+  document.getElementById('sa-slug-preview').textContent = data.slug;
+  document.getElementById('sa-pin-caja').value   = data.pin_caja;
+  document.getElementById('sa-pin-cocina').value = data.pin_cocina;
+  document.getElementById('sa-modal-titulo').textContent = 'Editar evento';
+  document.getElementById('sa-error').style.display = 'none';
+  saRenderCats();
+  document.getElementById('sa-modal').style.display = 'block';
+}
+
+function saAutoSlug(){
+  const nombre = document.getElementById('sa-nombre').value;
+  const slug = nombre.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-');
+  if(!_saEditId){ // solo auto-completa en nuevo evento
+    document.getElementById('sa-slug').value = slug;
+  }
+  document.getElementById('sa-slug-preview').textContent = document.getElementById('sa-slug').value || '…';
+}
+
+function saRenderCats(){
+  const el = document.getElementById('sa-cats');
+  el.innerHTML = _saCats.map((cat, ci) => `
+    <div class="sa-cat-editor" data-ci="${ci}">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <input type="text" value="${cat.emoji||'🛒'}" maxlength="2" style="width:44px;text-align:center;padding:6px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--fg);font-size:1.2rem" onchange="_saCats[${ci}].emoji=this.value">
+        <input type="text" value="${cat.nombre||''}" placeholder="Nombre categoría" style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--fg);font-size:.85rem;font-family:inherit" onchange="_saCats[${ci}].nombre=this.value">
+        <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;font-weight:700;color:var(--grn);white-space:nowrap">
+          <input type="checkbox" ${cat.cocina?'checked':''} onchange="_saCats[${ci}].cocina=this.checked"> 🍳 Cocina
+        </label>
+        <button onclick="_saCats.splice(${ci},1);saRenderCats()" style="padding:4px 8px;border:none;border-radius:6px;background:var(--sur);color:#e53;font-size:.8rem;cursor:pointer">✕</button>
+      </div>
+      <div id="sa-prods-${ci}" style="display:flex;flex-direction:column;gap:6px">
+        ${(cat.productos||[]).map((p,pi) => `
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" value="${p.emoji||'🍽'}" maxlength="2" style="width:36px;text-align:center;padding:4px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg)" onchange="_saCats[${ci}].productos[${pi}].emoji=this.value">
+            <input type="text" value="${p.nombre||''}" placeholder="Producto" style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.82rem;font-family:inherit" onchange="_saCats[${ci}].productos[${pi}].nombre=this.value">
+            <input type="number" value="${p.precio||0}" placeholder="$" style="width:80px;padding:5px 8px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg);color:var(--fg);font-size:.82rem" onchange="_saCats[${ci}].productos[${pi}].precio=+this.value">
+            <button onclick="_saCats[${ci}].productos.splice(${pi},1);saRenderCats()" style="padding:3px 7px;border:none;border-radius:6px;background:var(--bg);color:#e53;font-size:.75rem;cursor:pointer">✕</button>
+          </div>`).join('')}
+      </div>
+      <button onclick="_saCats[${ci}].productos.push({id:'p'+Date.now(),emoji:'🍽',nombre:'',precio:0});saRenderCats()" style="width:100%;margin-top:8px;padding:5px;border:1px dashed var(--bdr);border-radius:8px;background:transparent;color:var(--fg2);font-size:.75rem;cursor:pointer">+ Producto</button>
+    </div>`).join('');
+}
+
+function saAgregarCategoria(){
+  _saCats.push({nombre:'Nueva categoría', emoji:'🛒', cocina:false, productos:[]});
+  saRenderCats();
+}
+
+async function saGuardarEvento(){
+  // Capturar valores actuales de los inputs antes de guardar
+  document.querySelectorAll('.sa-cat-editor').forEach((el,ci) => {
+    if(_saCats[ci]){
+      const inputs = el.querySelectorAll('input[type=text]');
+      if(inputs[0]) _saCats[ci].emoji  = inputs[0].value;
+      if(inputs[1]) _saCats[ci].nombre = inputs[1].value;
+      _saCats[ci].productos = (_saCats[ci].productos||[]).map((p,pi) => {
+        const row = el.querySelectorAll('#sa-prods-'+ci+' > div')[pi];
+        if(row){
+          const ins = row.querySelectorAll('input');
+          return {...p, emoji:ins[0]?.value||p.emoji, nombre:ins[1]?.value||p.nombre, precio:+(ins[2]?.value||p.precio), id:p.id||('p'+Date.now()+pi)};
+        }
+        return p;
+      });
+    }
+  });
+
+  const nombre   = document.getElementById('sa-nombre').value.trim();
+  const slug     = document.getElementById('sa-slug').value.trim().toLowerCase().replace(/\s+/g,'-');
+  const pin_caja = document.getElementById('sa-pin-caja').value.trim();
+  const pin_cocina = document.getElementById('sa-pin-cocina').value.trim();
+  const errEl = document.getElementById('sa-error');
+
+  if(!nombre || !slug){ errEl.textContent='Nombre y slug son obligatorios'; errEl.style.display='block'; return; }
+  if(!/^\d{4}$/.test(pin_caja) || !/^\d{4}$/.test(pin_cocina)){ errEl.textContent='Los PINs deben ser 4 dígitos'; errEl.style.display='block'; return; }
+
+  const payload = { nombre, slug, pin_caja, pin_cocina, categorias: _saCats, activo: true };
+  let error;
+  if(_saEditId){
+    ({error} = await _sb.from('eventos').update(payload).eq('id',_saEditId));
+  } else {
+    ({error} = await _sb.from('eventos').insert(payload));
+  }
+  if(error){ errEl.textContent='Error: '+error.message; errEl.style.display='block'; return; }
+  document.getElementById('sa-modal').style.display = 'none';
+  saCargarEventos();
+}
+
+async function saToggleActivo(id, activo){
+  await _sb.from('eventos').update({activo:!activo}).eq('id',id);
+  saCargarEventos();
+}
+
+async function saEliminarEvento(id, nombre){
+  if(!confirm(`¿Eliminar "${nombre}"?\nSe borrarán todos sus pedidos también.`)) return;
+  await _sb.from('pedidos').delete().eq('evento', nombre); // borrar pedidos del evento
+  await _sb.from('eventos').delete().eq('id',id);
+  saCargarEventos();
+}
+
+// Escuchar input en slug para actualizar preview
+document.getElementById('sa-slug')?.addEventListener('input', function(){
+  document.getElementById('sa-slug-preview').textContent = this.value || '…';
+});
 </script>
 </body>
 </html>
