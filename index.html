@@ -1873,6 +1873,7 @@ function sbSuscribir(eventoNombre){
       { event: 'INSERT', schema: 'public', table: 'pedidos' },
       payload => {
         if(payload.new.evento !== _eventoActual) return;
+        if(_pedidos.some(p=>p.id===payload.new.id)) return; // evitar duplicados
         _pedidos.unshift(payload.new);
         renderPedidos();
         actualizarBadgePedidos();
@@ -1894,7 +1895,7 @@ async function sbActualizar(){
   const {data, error} = await _sb.from('pedidos')
     .select('*')
     .eq('evento', _eventoActual)
-    .eq('estado','pendiente')
+    .in('estado',['pendiente','confirmado'])
     .order('created_at', {ascending:false});
   if(btn){ btn.textContent = '🔄 Actualizar'; btn.disabled = false; }
   if(data){ _pedidos = data; renderPedidos(); actualizarBadgePedidos(); }
