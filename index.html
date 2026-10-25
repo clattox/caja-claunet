@@ -482,6 +482,7 @@ body{
     <div class="intro-wish">¡Mucho éxito en el evento! 🎉</div>
     <div class="intro-credit">Desarrollado con ❤️ por ClauNet<br>para quienes trabajan por su comunidad</div>
     <div class="intro-url">claunet.cl</div>
+    <button id="btn-comenzar" style="margin-top:28px;padding:14px 40px;border-radius:50px;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.12);color:#fff;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;cursor:pointer;letter-spacing:.04em;transition:background .2s">✨ Comenzar</button>
   </div>
 </div>
 
@@ -813,9 +814,8 @@ const CFG_DEFAULT = {
   try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
   if(!cfg || !cfg.categorias || !cfg.categorias.length){ cfg = CFG_DEFAULT; localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
 
-  // Mostrar intro 2.5s luego ir al selector
   showView('v-intro');
-  setTimeout(() => mostrarSelector(), 2800);
+  document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 })();
 
 // ═══════════════════════════════════════
