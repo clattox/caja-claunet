@@ -612,7 +612,7 @@ let historial = [];
 let ventaNum = 1;
 let tabActivo = 'productos';
 
-const fmt = n => '$' + n.toLocaleString('es-CL');
+const fmt = n => '$' + (Number(n)||0).toLocaleString('es-CL');
 const getProd = id => { for(const c of cfg.categorias){ const p = c.productos.find(x=>x.id===id); if(p) return p; } };
 const uid = () => Math.random().toString(36).slice(2,8);
 
@@ -1232,15 +1232,14 @@ function exportarExcel(){
 
 // ── CIERRE DE CAJA ──────────────────────────────────────────────────────────
 function mostrarCierre(){
-  if(!historial.length) return;
-  const tot   = historial.reduce((a,v)=>a+v.total,0);
-  const totEf = historial.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+v.total,0);
-  const totTr = historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+v.total,0);
-  document.getElementById('cierre-fecha').textContent = cfg.nombre + (cfg.fecha ? ' · '+cfg.fecha : '');
-  document.getElementById('cierre-nventas').textContent = historial.length;
-  document.getElementById('cierre-ef').textContent  = fmt(totEf);
-  document.getElementById('cierre-tr').textContent  = fmt(totTr);
-  document.getElementById('cierre-tot').textContent = fmt(tot);
+  const tot   = historial.reduce((a,v)=>a+(Number(v.total)||0),0);
+  const totEf = historial.filter(v=>v.pago==='efectivo').reduce((a,v)=>a+(Number(v.total)||0),0);
+  const totTr = historial.filter(v=>v.pago==='transferencia').reduce((a,v)=>a+(Number(v.total)||0),0);
+  document.getElementById('cierre-fecha').textContent    = (cfg.nombre||'') + (cfg.fecha ? ' · '+cfg.fecha : '');
+  document.getElementById('cierre-nventas').textContent  = historial.length;
+  document.getElementById('cierre-ef').textContent       = fmt(totEf);
+  document.getElementById('cierre-tr').textContent       = fmt(totTr);
+  document.getElementById('cierre-tot').textContent      = fmt(tot);
   document.getElementById('cierre-overlay').hidden = false;
 }
 document.getElementById('cierre-close').onclick  = ()=>{ document.getElementById('cierre-overlay').hidden=true; };
