@@ -2277,14 +2277,17 @@ async function iniciarModoCocina(eventoParam){
   const connEl = document.getElementById('cocina-conn');
   const tituloEl = document.getElementById('cocina-titulo');
   if(tituloEl) tituloEl.textContent = _cocinaEvento;
+  console.log('[cocina] esperando evento:', JSON.stringify(_cocinaEvento));
 
   showView('v-cocina');
   // Realtime
   if(_cocinaChannel) _sb && _sb.removeChannel(_cocinaChannel);
+  const _matchEvento = (ev) => (ev||'').trim().toLowerCase() === _cocinaEvento.trim().toLowerCase();
   _cocinaChannel = _sb.channel('cocina-'+Date.now())
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},
       payload => {
-        if(payload.new.evento !== _cocinaEvento) return;
+        console.log('[cocina] INSERT recibido:', payload.new.evento, '| estado:', payload.new.estado);
+        if(!_matchEvento(payload.new.evento)) return;
         const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
         if(!tieneComida) return;
         if(['pendiente','confirmado'].includes(payload.new.estado)){
@@ -2295,15 +2298,14 @@ async function iniciarModoCocina(eventoParam){
       })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos'},
       payload => {
-        if(payload.new.evento !== _cocinaEvento) return;
+        console.log('[cocina] UPDATE recibido:', payload.new.evento, '| estado:', payload.new.estado);
+        if(!_matchEvento(payload.new.evento)) return;
         const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
         if(!tieneComida) return;
         if(['pendiente','confirmado'].includes(payload.new.estado)){
-          // actualizar o agregar
           _cocina_pedidos = [payload.new, ..._cocina_pedidos.filter(p=>p.id!==payload.new.id)];
           cocinaRender(_cocina_pedidos);
         } else {
-          // listo u otro estado → sacar de la lista
           _cocina_pedidos = _cocina_pedidos.filter(p=>p.id!==payload.new.id);
           cocinaRender(_cocina_pedidos);
         }
@@ -2318,11 +2320,15 @@ async function iniciarModoCocina(eventoParam){
 let _cocina_pedidos = [];
 async function cocinaActualizar(){
   if(!_sb || !_cocinaEvento) return;
-  const {data} = await _sb.from('pedidos').select('*')
-    .eq('evento',_cocinaEvento).in('estado',['pendiente','confirmado'])
+  console.log('[cocina] query con evento:', JSON.stringify(_cocinaEvento));
+  const {data, error} = await _sb.from('pedidos').select('*')
+    .ilike('evento', _cocinaEvento.trim())
+    .in('estado',['pendiente','confirmado'])
     .order('created_at',{ascending:true});
+  console.log('[cocina] query resultado:', data?.length, 'pedidos | error:', error?.message);
   if(data){
     _cocina_pedidos = data.filter(p=>(p.items||[]).some(i=>i.cocina));
+    console.log('[cocina] con comida:', _cocina_pedidos.length);
     cocinaRender(_cocina_pedidos);
   }
 }
