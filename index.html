@@ -482,6 +482,53 @@ function showView(id){
 }
 
 // ═══════════════════════════════════════
+//  CONFIG POR DEFECTO (Escuela de Talentos)
+// ═══════════════════════════════════════
+const CFG_DEFAULT = {
+  nombre: '🎵 Escuela de Talentos',
+  fecha: '2026-10-24',
+  categorias: [
+    {
+      id: 'bebestibles',
+      label: '🥤 Bebestibles',
+      productos: [
+        {id:'beb01', emoji:'🥫', nombre:'Bebida lata',    precio:1500},
+        {id:'beb02', emoji:'🧃', nombre:'Jugos',          precio:500},
+        {id:'beb03', emoji:'🍺', nombre:'Cerveza 470cc',  precio:2000},
+        {id:'beb04', emoji:'🍺', nombre:'Michelada 500cc',precio:3000},
+        {id:'beb05', emoji:'☕', nombre:'Té / Café',      precio:1000},
+      ]
+    },
+    {
+      id: 'comida',
+      label: '🍔 Para la Guatita',
+      productos: [
+        {id:'com01', emoji:'🍟', nombre:'Papas Fritas',        precio:1500},
+        {id:'com02', emoji:'🌭', nombre:'Salchipapas',         precio:3000},
+        {id:'com03', emoji:'🌭', nombre:'Completo Italiano',   precio:2500},
+        {id:'com04', emoji:'🥟', nombre:'Empanadas pino',      precio:2500},
+        {id:'com05', emoji:'🫓', nombre:'Sopaipillas',         precio:1000},
+        {id:'com06', emoji:'➕', nombre:'Agregado',            precio:1500},
+        {id:'com07', emoji:'🍦', nombre:'Helado de agua',      precio:500},
+      ]
+    },
+    {
+      id: 'especiales',
+      label: '⭐ Especiales',
+      productos: [
+        {id:'esp01', emoji:'🍑', nombre:'Mote con huesillo',   precio:2500},
+        {id:'esp02', emoji:'🍢', nombre:'Anticuchos',          precio:3000},
+        {id:'esp03', emoji:'🍦', nombre:'Helado con bebida',   precio:3000},
+        {id:'esp04', emoji:'🍷', nombre:'Borgoña',             precio:2500},
+        {id:'esp05', emoji:'🍰', nombre:'Trocitos de queque',  precio:1000},
+        {id:'esp06', emoji:'🥤', nombre:'Terremoto',           precio:3500},
+        {id:'esp07', emoji:'🥩', nombre:'Choripán',            precio:3000},
+      ]
+    }
+  ]
+};
+
+// ═══════════════════════════════════════
 //  ARRANQUE
 // ═══════════════════════════════════════
 (function init(){
@@ -489,7 +536,10 @@ function showView(id){
   try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
 
   if(!cfg || !cfg.categorias || !cfg.categorias.length){
-    showView('v-setup');
+    // Cargar config por defecto del evento
+    cfg = CFG_DEFAULT;
+    localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+    abrirCaja();
   } else {
     abrirCaja();
   }
