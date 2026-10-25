@@ -2119,22 +2119,19 @@ async function sbMandarCocina(id){
   const p = _pedidos.find(x=>x.id===id);
   if(!p) return;
   const itemsCocina = (p.items||[]).filter(i=>i.cocina);
-  if(!itemsCocina.length) return;
+  if(!itemsCocina.length){ alert('Este pedido no tiene productos de cocina'); return; }
   const btn = document.querySelector(`[onclick="sbMandarCocina('${id}')"]`);
   if(btn){ btn.textContent='⏳ Enviando…'; btn.disabled=true; }
-  const {error} = await _sb.from('pedidos').insert({
-    evento: _eventoActual,
-    nombre_cliente: p.nombre_cliente,
-    mesa: p.mesa,
-    items: itemsCocina,
-    total: itemsCocina.reduce((a,i)=>a+i.sub,0),
-    estado: 'pendiente',
-    notas: '🍳 Comanda desde caja'
-  });
+  // Confirmar el pedido → dispara UPDATE que cocina sí recibe por realtime
+  const {error} = await _sb.from('pedidos').update({estado:'confirmado'}).eq('id', id);
+  if(!error){
+    _pedidos = _pedidos.map(x => x.id===id ? {...x, estado:'confirmado'} : x);
+    renderPedidos(); actualizarBadgePedidos();
+  }
   if(btn){
-    btn.textContent = error ? '❌ Error' : '✅ Enviado a cocina';
-    btn.disabled = true;
-    btn.style.opacity = '.6';
+    btn.textContent = error ? '❌ Error' : '✅ En cocina';
+    btn.disabled = !error;
+    btn.style.opacity = error ? '1' : '.6';
   }
 }
 
@@ -2336,6 +2333,9 @@ async function iniciarModoCocina(eventoParam){
       if(el) el.textContent = status==='SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
     });
   cocinaActualizar();
+  // Polling cada 6s como respaldo del realtime (INSERT no siempre llega por WS)
+  if(window._cocinaPoller) clearInterval(window._cocinaPoller);
+  window._cocinaPoller = setInterval(cocinaActualizar, 6000);
 }
 
 let _cocina_pedidos = [];
