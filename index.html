@@ -459,6 +459,7 @@ body{
   <div class="content">
     <div class="tabs" id="caja-tabs"></div>
     <div id="caja-grids"></div>
+    <div id="tab-historial" hidden></div>
     <div class="cart-box">
       <div class="cart-hdr">
         <span>🛒 Pedido actual</span>
@@ -852,12 +853,12 @@ function setTab(id){
   const grids = document.getElementById('caja-grids');
   const hist  = document.getElementById('tab-historial');
   if(id === 'historial'){
-    grids.hidden = true;
-    hist.hidden  = false;
+    grids.style.display = 'none';
+    hist.hidden = false;
     renderHistorial();
   } else {
-    grids.hidden = false;
-    hist.hidden  = true;
+    grids.style.display = '';
+    hist.hidden = true;
   }
 }
 
@@ -886,8 +887,6 @@ function renderGrids(){
     });
     cont.appendChild(grid);
   });
-  const h = document.createElement('div'); h.id='tab-historial'; h.hidden=true;
-  cont.appendChild(h);
 }
 
 function actualizarStockBtn(id){
