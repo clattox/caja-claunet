@@ -446,13 +446,24 @@ button:active:not(:disabled){transform:scale(.98)}
 
 
 /* ══ SUPERADMIN ══ */
-.sa-evento-card{background:var(--sur);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;border:1px solid var(--bdr)}
-.sa-evento-card .sa-badge{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.sa-evento-card .sa-badge.on{background:var(--grn)}
-.sa-evento-card .sa-badge.off{background:var(--fg2)}
-.sa-evento-info{flex:1;min-width:0}
-.sa-evento-nombre{font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:900;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sa-evento-slug{font-size:.72rem;color:var(--fg2);margin-top:2px}
+#v-superadmin .content{max-width:760px}
+.sa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.sa-evento-card{background:var(--sur);border-radius:16px;padding:18px;border:1px solid var(--bdr);display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh)}
+.sa-evento-card.inactivo{opacity:.6}
+.sa-evento-top{display:flex;align-items:flex-start;gap:10px}
+.sa-badge{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sa-badge.on{background:var(--grn)}
+.sa-badge.off{background:var(--fg2)}
+.sa-evento-nombre{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--fg);line-height:1.2}
+.sa-evento-slug{font-size:.72rem;color:var(--fg2);margin-top:3px;font-family:monospace;letter-spacing:.03em}
+.sa-evento-meta{display:flex;gap:8px;flex-wrap:wrap}
+.sa-pill{padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:700;background:var(--bg);color:var(--fg2);border:1px solid var(--bdr)}
+.sa-acciones{display:flex;gap:8px}
+.sa-btn{flex:1;padding:8px;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:900;cursor:pointer;text-align:center}
+.sa-btn-edit{background:var(--acc);color:#fff}
+.sa-btn-toggle-on{background:color-mix(in srgb,var(--grn) 15%,var(--sur));color:var(--grn);border:1px solid var(--grn)}
+.sa-btn-toggle-off{background:var(--bg);color:var(--fg2);border:1px solid var(--bdr)}
+.sa-btn-del{background:var(--bg);color:#e53;border:1px solid #e53;flex:0;padding:8px 12px}
 .sa-cat-editor{background:var(--bg);border-radius:10px;padding:10px 12px;border:1px solid var(--bdr)}
 
 /* ══ VISTA COCINA ══ */
@@ -719,12 +730,15 @@ body{
     <button class="hdr-btn" onclick="showView('v-login')">✕ Salir</button>
   </div>
   <div class="content" style="padding-top:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div style="font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--fg)">Eventos</div>
-      <button onclick="saNuevoEvento()" style="padding:8px 14px;border:none;border-radius:10px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;cursor:pointer">+ Nuevo evento</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div>
+        <div style="font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900;color:var(--fg)">Eventos</div>
+        <div style="font-size:.75rem;color:var(--fg2);margin-top:2px">Cada evento tiene su propio menú, PINs y pedidos</div>
+      </div>
+      <button onclick="saNuevoEvento()" style="padding:10px 18px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(26,111,181,.35)">＋ Nuevo evento</button>
     </div>
-    <div id="sa-lista" style="display:flex;flex-direction:column;gap:10px">
-      <div style="text-align:center;padding:40px;color:var(--fg2);font-size:.85rem">Cargando eventos…</div>
+    <div id="sa-lista" class="sa-grid">
+      <div style="text-align:center;padding:40px;color:var(--fg2);font-size:.85rem;grid-column:1/-1">Cargando eventos…</div>
     </div>
   </div>
 </div>
@@ -2361,19 +2375,32 @@ async function saCargarEventos(){
     lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--fg2);font-size:.85rem">No hay eventos aún. ¡Crea el primero!</div>';
     return;
   }
-  lista.innerHTML = _saEventos.map(ev => `
-    <div class="sa-evento-card">
-      <div class="sa-badge ${ev.activo?'on':'off'}"></div>
-      <div class="sa-evento-info">
-        <div class="sa-evento-nombre">${ev.nombre}</div>
-        <div class="sa-evento-slug">/${ev.slug} · PIN caja: ${ev.pin_caja}</div>
+  lista.innerHTML = _saEventos.map(ev => {
+    const nProds = (ev.categorias||[]).reduce((a,c)=>a+(c.productos||[]).length,0);
+    const nCats  = (ev.categorias||[]).length;
+    const slug   = ev.slug || '';
+    return `
+    <div class="sa-evento-card ${ev.activo?'':'inactivo'}">
+      <div class="sa-evento-top">
+        <div class="sa-badge ${ev.activo?'on':'off'}"></div>
+        <div style="flex:1;min-width:0">
+          <div class="sa-evento-nombre">${ev.nombre}</div>
+          <div class="sa-evento-slug">caja.claunet.cl?evento=${slug}</div>
+        </div>
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="saEditarEvento('${ev.id}')" style="padding:6px 10px;border:none;border-radius:8px;background:var(--acc);color:#fff;font-size:.75rem;font-weight:900;cursor:pointer">✏️</button>
-        <button onclick="saToggleActivo('${ev.id}',${ev.activo})" style="padding:6px 10px;border:none;border-radius:8px;background:${ev.activo?'var(--grn)':'var(--sur)'};color:${ev.activo?'#fff':'var(--fg2)'};font-size:.75rem;font-weight:900;cursor:pointer">${ev.activo?'✓ Activo':'○ Inactivo'}</button>
-        <button onclick="saEliminarEvento('${ev.id}','${ev.nombre.replace(/'/g,"\'")}')" style="padding:6px 10px;border:none;border-radius:8px;background:var(--sur);color:#e53;font-size:.75rem;font-weight:900;cursor:pointer">🗑</button>
+      <div class="sa-evento-meta">
+        <span class="sa-pill">📦 ${nProds} productos</span>
+        <span class="sa-pill">🗂 ${nCats} categorías</span>
+        <span class="sa-pill">🔑 PIN: ${ev.pin_caja}</span>
+        <span class="sa-pill ${ev.activo?'':''}">● ${ev.activo?'Activo':'Inactivo'}</span>
       </div>
-    </div>`).join('');
+      <div class="sa-acciones">
+        <button class="sa-btn sa-btn-edit" onclick="saEditarEvento('${ev.id}')">✏️ Editar</button>
+        <button class="sa-btn ${ev.activo?'sa-btn-toggle-on':'sa-btn-toggle-off'}" onclick="saToggleActivo('${ev.id}',${ev.activo})">${ev.activo?'✓ Activo':'○ Inactivo'}</button>
+        <button class="sa-btn sa-btn-del" onclick="saEliminarEvento('${ev.id}','${ev.nombre.replace(/'/g,"\\'")}')" title="Eliminar">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function saNuevoEvento(){
