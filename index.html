@@ -732,9 +732,12 @@ body{
     <div id="caja-grids"></div>
     <div id="tab-historial" hidden></div>
     <div id="tab-pedidos" hidden>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 2px 8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 2px 8px;gap:8px">
         <span style="font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--fg2)">📥 Pedidos entrantes</span>
-        <span id="pedidos-conn" style="font-size:.7rem;color:var(--fg2)">⚪ Conectando…</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="pedidos-conn" style="font-size:.7rem;color:var(--fg2)">⚪ Conectando…</span>
+          <button onclick="sbActualizar()" style="padding:4px 10px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);color:var(--fg2);font-size:.72rem;font-weight:800;min-height:auto">🔄 Actualizar</button>
+        </div>
       </div>
       <div id="pedidos-lista"><div class="pedidos-vacio">Esperando pedidos… 👀</div></div>
     </div>
@@ -1768,40 +1771,49 @@ function sbInit(){
 }
 
 // ── Suscripción realtime (caja) ──
+let _eventoActual = '';
+
 function sbSuscribir(eventoNombre){
   if(!_sb) return;
+  _eventoActual = eventoNombre;
   if(_sbChannel){ _sb.removeChannel(_sbChannel); }
   const conn = document.getElementById('pedidos-conn');
   if(conn) conn.textContent = '🟡 Conectando…';
 
+  // Realtime — sin filter para evitar problemas con caracteres especiales
+  // filtramos en el cliente
   _sbChannel = _sb
-    .channel('pedidos-'+eventoNombre)
+    .channel('pedidos-caja-' + Date.now())
     .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `evento=eq.${eventoNombre}` },
+      { event: 'INSERT', schema: 'public', table: 'pedidos' },
       payload => {
+        if(payload.new.evento !== _eventoActual) return;
         _pedidos.unshift(payload.new);
         renderPedidos();
         actualizarBadgePedidos();
-        // Sonido + vibración
-        try{ new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA...').play(); }catch(e){}
         try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
       }
     )
     .subscribe(status => {
-      if(conn){
-        conn.textContent = status === 'SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
-      }
+      const conn = document.getElementById('pedidos-conn');
+      if(conn) conn.textContent = status === 'SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
     });
 
-  // Cargar pedidos pendientes al entrar
-  _sb.from('pedidos')
+  sbActualizar();
+}
+
+async function sbActualizar(){
+  if(!_sb || !_eventoActual) return;
+  const btn = document.querySelector('[onclick="sbActualizar()"]');
+  if(btn){ btn.textContent = '⏳'; btn.disabled = true; }
+  const {data, error} = await _sb.from('pedidos')
     .select('*')
-    .eq('evento', eventoNombre)
+    .eq('evento', _eventoActual)
     .eq('estado','pendiente')
-    .order('created_at', {ascending:false})
-    .then(({data}) => {
-      if(data){ _pedidos = data; renderPedidos(); actualizarBadgePedidos(); }
-    });
+    .order('created_at', {ascending:false});
+  if(btn){ btn.textContent = '🔄 Actualizar'; btn.disabled = false; }
+  if(data){ _pedidos = data; renderPedidos(); actualizarBadgePedidos(); }
+  if(error) console.error('sbActualizar error:', error);
 }
 
 function renderPedidos(){
