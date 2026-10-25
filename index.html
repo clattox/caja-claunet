@@ -1922,7 +1922,6 @@ async function cargarEventosSelector(){
   }
   el.innerHTML = _selEventos.map(ev => `
     <button onclick="seleccionarEvento('${ev.id}')" style="width:100%;padding:14px 18px;border:2px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(255,255,255,.12);color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;transition:background .15s">
-      <span style="font-size:1.6rem">🎪</span>
       <span style="flex:1">${ev.nombre}</span>
       <span style="font-size:.72rem;opacity:.6;font-weight:700">→</span>
     </button>`).join('');
