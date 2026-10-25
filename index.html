@@ -1077,16 +1077,20 @@ const CFG_DEFAULT = {
   try { cfg = JSON.parse(localStorage.getItem(LS_CFG)); } catch(e){}
   if(!cfg || !cfg.categorias || !cfg.categorias.length){ cfg = CFG_DEFAULT; localStorage.setItem(LS_CFG, JSON.stringify(cfg)); }
 
-  // Restaurar sesión de caja activa (si recargó la página durante un evento)
+  showView('v-intro');
+  document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
+
+  // Restaurar sesión de caja activa al recargar (esperar a que Supabase esté listo)
   const eventoGuardado = localStorage.getItem('caja_evento_activo');
   if(eventoGuardado && cfg && cfg.nombre){
-    _eventoActual = eventoGuardado;
-    sbInit();
-    abrirCaja();
-  } else {
-    showView('v-intro');
+    setTimeout(() => {
+      try {
+        _eventoActual = eventoGuardado;
+        sbInit();
+        abrirCaja();
+      } catch(e){ showView('v-intro'); }
+    }, 300);
   }
-  document.getElementById('btn-comenzar').onclick = () => mostrarSelector();
 })();
 
 // ═══════════════════════════════════════
