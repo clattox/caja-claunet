@@ -1442,7 +1442,8 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
             pinCocina: _selEventoActual.pin_cocina,
           };
           _eventoActual = _selEventoActual.nombre;
-          abrirCaja();
+          // Mostrar selector Caja / Bingo
+          mostrarSelectorModo();
         } else {
           document.getElementById('pin-err').textContent = 'PIN incorrecto';
           pinBuffer = ''; actualizarDots();
@@ -1924,6 +1925,34 @@ function seleccionarEvento(id){
   actualizarDots();
   _pinDestinoSelector = 'evento';
   document.getElementById('pin-overlay').hidden = false;
+}
+
+function mostrarSelectorModo(){
+  // Mostrar overlay para elegir Caja o Bingo
+  let ov = document.getElementById('modo-overlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'modo-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,.75);display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter:blur(4px)';
+    document.body.appendChild(ov);
+  }
+  ov.hidden = false;
+  ov.innerHTML = `
+    <div style="background:linear-gradient(160deg,#1a6fb5,#0d4a8a);border-radius:24px;padding:28px 24px;width:min(88vw,320px);text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.4)">
+      <div style="font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Evento</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:20px">${cfg.nombre}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <button onclick="document.getElementById('modo-overlay').hidden=true; abrirCaja()"
+          style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 12px;border-radius:18px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">
+          <span style="font-size:2.4rem">🧾</span>Caja
+        </button>
+        <button onclick="document.getElementById('modo-overlay').hidden=true; abrirBingo()"
+          style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 12px;border-radius:18px;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">
+          <span style="font-size:2.4rem">🎱</span>Bingo
+        </button>
+      </div>
+      <button onclick="document.getElementById('modo-overlay').hidden=true" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:.8rem;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer">← Volver</button>
+    </div>`;
 }
 
 // sel-caja y sel-bingo ya no existen — reemplazados por cargarEventosSelector()
