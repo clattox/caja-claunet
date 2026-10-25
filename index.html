@@ -2574,21 +2574,21 @@ function saCargarMenuBase(){
 }
 
 async function saGuardarEvento(){
-  // Capturar valores actuales de los inputs antes de guardar
-  document.querySelectorAll('.sa-cat-editor').forEach((el,ci) => {
-    if(_saCats[ci]){
-      const inputs = el.querySelectorAll('input[type=text]');
-      if(inputs[0]) _saCats[ci].emoji  = inputs[0].value;
-      if(inputs[1]) _saCats[ci].nombre = inputs[1].value;
-      _saCats[ci].productos = (_saCats[ci].productos||[]).map((p,pi) => {
-        const row = el.querySelectorAll('#sa-prods-'+ci+' > div')[pi];
-        if(row){
-          const ins = row.querySelectorAll('input');
-          return {...p, emoji:ins[0]?.value||p.emoji, nombre:ins[1]?.value||p.nombre, precio:+(ins[2]?.value||p.precio), id:p.id||('p'+Date.now()+pi)};
-        }
-        return p;
-      });
-    }
+  // Leer valores actuales de todos los inputs del DOM (onchange no siempre dispara en móvil)
+  document.querySelectorAll('.sa-cat-editor').forEach((el, ci) => {
+    if(!_saCats[ci]) return;
+    const allInputs = el.querySelectorAll('input[type=text], input[type=number]');
+    // inputs por cat: [emoji, nombre, ...productos(emoji,nombre,precio)×N]
+    let idx = 0;
+    _saCats[ci].emoji  = allInputs[idx++]?.value || _saCats[ci].emoji;
+    _saCats[ci].nombre = allInputs[idx++]?.value || _saCats[ci].nombre;
+    _saCats[ci].cocina = el.querySelector('input[type=checkbox]')?.checked || false;
+    _saCats[ci].productos = (_saCats[ci].productos||[]).map(p => {
+      const emoji  = allInputs[idx++]?.value || p.emoji;
+      const nombre = allInputs[idx++]?.value || p.nombre;
+      const precio = +(allInputs[idx++]?.value ?? p.precio);
+      return {...p, emoji, nombre, precio, id: p.id || ('p'+Date.now()+Math.random())};
+    });
   });
 
   const nombre   = document.getElementById('sa-nombre').value.trim();
