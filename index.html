@@ -598,6 +598,7 @@ body{
         <div class="lbl">Total venta</div>
         <div class="amt" id="caja-total">$0</div>
       </div>
+      <button class="hdr-btn" id="btn-salir-caja" style="background:rgba(255,255,255,.12)">← Salir</button>
       <button class="hdr-btn" id="btn-ir-admin2">⚙️</button>
     </div>
   </div>
@@ -1443,6 +1444,12 @@ document.getElementById('bingo-cerrar-ronda').onclick = () => {
 };
 
 document.getElementById('bingo-volver').onclick = () => mostrarSelector();
+
+document.getElementById('btn-salir-caja').onclick = () => {
+  const tieneCarrito = Object.keys(carrito).some(k => carrito[k] > 0);
+  if(tieneCarrito && !confirm('Tienes un pedido en curso. ¿Salir igual?\n(El historial de ventas no se borra)')) return;
+  mostrarSelector();
+};
 
 function renderBingoHistorial(){
   const wrap = document.getElementById('bingo-historial-wrap');
