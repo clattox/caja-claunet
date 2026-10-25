@@ -6,6 +6,7 @@
 <title>Caja · ClauNet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
 <style>
 :root,[data-theme="light"]{--bg:#a8c8e8;--sur:#c8dff2;--fg:#0a1628;--fg2:#3a5070;--acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#90b8d8;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
 [data-theme="dark"]{--bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;--acc:#4a9fd5;--yel:#f7a800;--grn:#48c59b;--bdr:#1a3050;--sh:0 2px 10px rgba(0,0,0,.30)}
@@ -444,6 +445,38 @@ button:active:not(:disabled){transform:scale(.98)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 
+/* ══ VISTA CLIENTE (menú QR) ══ */
+#v-menu .menu-hdr{background:linear-gradient(90deg,#1a6fb5,#0d4a8a);color:#fff;padding:16px;text-align:center}
+#v-menu .menu-hdr h1{font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900}
+#v-menu .menu-hdr p{font-size:.78rem;opacity:.85;margin-top:2px}
+.menu-paso{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--sur);border-bottom:1px solid var(--bdr);font-size:.82rem;font-weight:700;color:var(--acc)}
+.menu-paso span{background:var(--acc);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;flex-shrink:0}
+.menu-nombre-wrap{padding:14px 16px;background:var(--sur);border-bottom:2px solid var(--bdr)}
+.menu-nombre-wrap input{width:100%;padding:10px 14px;border-radius:10px;border:2px solid var(--bdr);background:var(--bg);color:var(--fg);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700}
+.menu-nombre-wrap input:focus{outline:none;border-color:var(--acc)}
+.btn-enviar-pedido{width:calc(100% - 32px);margin:16px;padding:16px;border-radius:var(--r);border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:1.05rem;font-weight:900;box-shadow:0 4px 14px rgba(42,157,92,.4)}
+.btn-enviar-pedido:disabled{background:var(--bdr);color:var(--fg2);box-shadow:none}
+.menu-estado{padding:40px 20px;text-align:center}
+.menu-estado .big-icon{font-size:4rem;margin-bottom:12px}
+.menu-estado h2{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:900;color:var(--acc)}
+.menu-estado p{color:var(--fg2);font-size:.88rem;margin-top:8px}
+
+/* ══ BANDEJA PEDIDOS (en caja) ══ */
+.pedidos-badge{position:absolute;top:-6px;right:-6px;background:#e53;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:900;display:flex;align-items:center;justify-content:center}
+.tab-pedidos-wrap{position:relative;display:inline-flex}
+.pedido-card{background:var(--sur);border:2px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;position:relative}
+.pedido-card.nuevo{border-color:var(--acc);animation:pulse-borde 1s ease 3}
+@keyframes pulse-borde{0%,100%{border-color:var(--acc)}50%{border-color:var(--yel)}}
+.pedido-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pedido-nombre{font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;color:var(--fg)}
+.pedido-hora{font-size:.72rem;color:var(--fg2)}
+.pedido-items{font-size:.82rem;color:var(--fg2);margin-bottom:10px;line-height:1.6}
+.pedido-total{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--acc)}
+.pedido-acciones{display:flex;gap:8px;margin-top:10px}
+.btn-confirmar{flex:1;padding:8px;border-radius:8px;border:none;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:900}
+.btn-rechazar{padding:8px 12px;border-radius:8px;border:2px solid var(--bdr);background:none;color:var(--fg2);font-size:.8rem;font-weight:800}
+.pedidos-vacio{padding:32px;text-align:center;color:var(--fg2);font-size:.85rem}
+
 /* ══ FONDO PREMIUM · textura geométrica discreta ══ */
 html,body{background-color:var(--bg)}
 body{
@@ -592,6 +625,34 @@ body{
   </div>
 </div>
 
+<!-- ══ VISTA CLIENTE (menú QR) ══ -->
+<div class="view" id="v-menu">
+  <!-- Estado: enviando/confirmado -->
+  <div id="menu-estado-ok" class="menu-estado" hidden>
+    <div class="big-icon">✅</div>
+    <h2>¡Pedido enviado!</h2>
+    <p id="menu-estado-txt">Tu pedido está en camino a la caja.</p>
+    <button onclick="menuReiniciar()" style="margin-top:20px;padding:12px 24px;border-radius:10px;border:none;background:var(--acc);color:#fff;font-family:'Nunito',sans-serif;font-weight:900">Hacer otro pedido</button>
+  </div>
+  <!-- Formulario pedido -->
+  <div id="menu-form">
+    <div class="menu-hdr">
+      <h1 id="menu-evento-nombre">🛒 Menú</h1>
+      <p>Elige tus productos y envía tu pedido</p>
+    </div>
+    <div class="menu-paso"><span>1</span> ¿Cómo te llamamos?</div>
+    <div class="menu-nombre-wrap">
+      <input type="text" id="menu-nombre" placeholder="Tu nombre o número de mesa…" maxlength="40" autocomplete="off">
+    </div>
+    <div class="menu-paso"><span>2</span> Elige tus productos</div>
+    <div style="padding:0 14px 8px" id="menu-grids"></div>
+    <div class="menu-paso"><span>3</span> Tu pedido</div>
+    <div id="menu-resumen" style="padding:0 16px 8px"></div>
+    <button class="btn-enviar-pedido" id="btn-enviar-pedido" disabled>✉️ Enviar pedido</button>
+    <p style="text-align:center;font-size:.72rem;color:var(--fg2);padding-bottom:20px">ClauNet · Caja Rápida</p>
+  </div>
+</div>
+
 <div class="view" id="v-setup">
   <div class="setup-wrap">
     <div class="setup-card">
@@ -670,6 +731,13 @@ body{
     <div class="tabs" id="caja-tabs"></div>
     <div id="caja-grids"></div>
     <div id="tab-historial" hidden></div>
+    <div id="tab-pedidos" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 2px 8px">
+        <span style="font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;color:var(--fg2)">📥 Pedidos entrantes</span>
+        <span id="pedidos-conn" style="font-size:.7rem;color:var(--fg2)">⚪ Conectando…</span>
+      </div>
+      <div id="pedidos-lista"><div class="pedidos-vacio">Esperando pedidos… 👀</div></div>
+    </div>
     <div class="cart-box">
       <div class="cart-hdr">
         <span>🛒 Pedido actual</span>
@@ -1139,35 +1207,45 @@ function abrirCaja(){
   renderGrids();
   renderCarrito();
   showView('v-caja');
+  // Conectar realtime con el nombre del evento
+  if(_sb) sbSuscribir(cfg.nombre || 'evento');
 }
 
-// TABS (solo Historial como tab)
+// TABS
 function renderTabs(){
   const cont = document.getElementById('caja-tabs');
   cont.innerHTML = '';
-  const b = document.createElement('button');
-  b.className = 'tab-btn'+(tabActivo==='historial'?'':' on');
-  b.textContent = '🛒 Productos';
-  b.onclick = () => setTab('productos');
-  cont.appendChild(b);
-  const h = document.createElement('button');
-  h.className = 'tab-btn'+(tabActivo==='historial'?' on':'');
-  h.textContent = '📋 Historial';
-  h.onclick = () => setTab('historial');
-  cont.appendChild(h);
+
+  const tabs = [
+    {id:'productos', label:'🛒 Productos'},
+    {id:'pedidos',   label:'📥 Pedidos', badge:true},
+    {id:'historial', label:'📋 Historial'},
+  ];
+  tabs.forEach(t => {
+    const wrap = document.createElement('div');
+    wrap.className = 'tab-pedidos-wrap';
+    const b = document.createElement('button');
+    b.className = 'tab-btn' + (tabActivo===t.id?' on':'');
+    b.textContent = t.label;
+    b.id = t.id==='pedidos'?'tab-btn-pedidos':'';
+    b.onclick = () => setTab(t.id);
+    wrap.appendChild(b);
+    cont.appendChild(wrap);
+  });
+  actualizarBadgePedidos();
 }
+
 function setTab(id){
   tabActivo = id; renderTabs();
   const grids = document.getElementById('caja-grids');
   const hist  = document.getElementById('tab-historial');
-  if(id === 'historial'){
-    grids.style.display = 'none';
-    hist.hidden = false;
-    renderHistorial();
-  } else {
-    grids.style.display = '';
-    hist.hidden = true;
-  }
+  const peds  = document.getElementById('tab-pedidos');
+  grids.style.display = 'none';
+  hist.hidden = true;
+  peds.hidden = true;
+  if(id === 'historial'){ hist.hidden = false; renderHistorial(); }
+  else if(id === 'pedidos'){ peds.hidden = false; renderPedidos(); }
+  else { grids.style.display = ''; }
 }
 
 // GRIDS — todas las categorías visibles a la vez
@@ -1663,16 +1741,234 @@ function abrirEmojiPicker(inp, p){
 function dibujarQR(){
   const el = document.getElementById('adm-qr');
   if(!el || typeof QRCode === 'undefined') return;
-  el.innerHTML = ''; // limpiar previo
+  el.innerHTML = '';
   try {
+    const eventoSlug = encodeURIComponent((cfg?.nombre||'evento').toLowerCase().replace(/\s+/g,'-'));
     new QRCode(el, {
-      text: 'https://caja.claunet.cl',
+      text: `https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,
       width: 100, height: 100,
-      colorDark: '#1a1008', colorLight: '#ffffff',
+      colorDark: '#0a1628', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
   } catch(e){}
 }
+
+// ═══════════════════════════════════════
+//  SUPABASE · Pedidos en tiempo real
+// ═══════════════════════════════════════
+const SB_URL = 'https://mcldbaubekjxpufmtrmk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1jbGRiYXViZWtqeHB1Zm10cm1rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4ODY2NjcsImV4cCI6MjEwODQ2MjY2N30.ooSZNrkEDlICGsv77esUv-ZhxzzfW3ZASoqEXIVW1I4';
+let _sb = null;
+let _sbChannel = null;
+let _pedidos = []; // cache local
+
+function sbInit(){
+  if(!window.supabase) return;
+  _sb = window.supabase.createClient(SB_URL, SB_KEY);
+}
+
+// ── Suscripción realtime (caja) ──
+function sbSuscribir(eventoNombre){
+  if(!_sb) return;
+  if(_sbChannel){ _sb.removeChannel(_sbChannel); }
+  const conn = document.getElementById('pedidos-conn');
+  if(conn) conn.textContent = '🟡 Conectando…';
+
+  _sbChannel = _sb
+    .channel('pedidos-'+eventoNombre)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `evento=eq.${eventoNombre}` },
+      payload => {
+        _pedidos.unshift(payload.new);
+        renderPedidos();
+        actualizarBadgePedidos();
+        // Sonido + vibración
+        try{ new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA...').play(); }catch(e){}
+        try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+      }
+    )
+    .subscribe(status => {
+      if(conn){
+        conn.textContent = status === 'SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
+      }
+    });
+
+  // Cargar pedidos pendientes al entrar
+  _sb.from('pedidos')
+    .select('*')
+    .eq('evento', eventoNombre)
+    .eq('estado','pendiente')
+    .order('created_at', {ascending:false})
+    .then(({data}) => {
+      if(data){ _pedidos = data; renderPedidos(); actualizarBadgePedidos(); }
+    });
+}
+
+function renderPedidos(){
+  const el = document.getElementById('pedidos-lista');
+  if(!el) return;
+  const pendientes = _pedidos.filter(p => p.estado === 'pendiente');
+  if(!pendientes.length){
+    el.innerHTML = '<div class="pedidos-vacio">Sin pedidos pendientes 🎉</div>';
+    return;
+  }
+  el.innerHTML = pendientes.map(p => {
+    const hora = new Date(p.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const items = (p.items||[]).map(i=>`${i.qty}× ${i.nombre}`).join(', ');
+    return `<div class="pedido-card nuevo" id="pc-${p.id}">
+      <div class="pedido-card-hdr">
+        <span class="pedido-nombre">👤 ${p.nombre_cliente||'Sin nombre'} ${p.mesa?'· Mesa '+p.mesa:''}</span>
+        <span class="pedido-hora">${hora}</span>
+      </div>
+      <div class="pedido-items">${items}</div>
+      <div class="pedido-total">${fmt(p.total)}</div>
+      <div class="pedido-acciones">
+        <button class="btn-confirmar" onclick="sbConfirmar('${p.id}')">✅ Confirmar y cobrar</button>
+        <button class="btn-rechazar" onclick="sbRechazar('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function actualizarBadgePedidos(){
+  const n = _pedidos.filter(p=>p.estado==='pendiente').length;
+  let badge = document.getElementById('badge-pedidos');
+  if(!badge){
+    const tabBtn = document.getElementById('tab-btn-pedidos');
+    if(tabBtn){
+      const wrap = tabBtn.closest('.tab-pedidos-wrap') || tabBtn.parentElement;
+      badge = document.createElement('span');
+      badge.id = 'badge-pedidos';
+      badge.className = 'pedidos-badge';
+      wrap.style.position = 'relative';
+      wrap.appendChild(badge);
+    }
+  }
+  if(badge){ badge.textContent = n; badge.style.display = n > 0 ? 'flex' : 'none'; }
+}
+
+async function sbConfirmar(id){
+  if(!_sb) return;
+  await _sb.from('pedidos').update({estado:'confirmado'}).eq('id',id);
+  _pedidos = _pedidos.map(p => p.id===id ? {...p, estado:'confirmado'} : p);
+  renderPedidos();
+  actualizarBadgePedidos();
+}
+
+async function sbRechazar(id){
+  if(!_sb || !confirm('¿Rechazar este pedido?')) return;
+  await _sb.from('pedidos').update({estado:'rechazado'}).eq('id',id);
+  _pedidos = _pedidos.map(p => p.id===id ? {...p, estado:'rechazado'} : p);
+  renderPedidos();
+  actualizarBadgePedidos();
+}
+
+// ── Vista cliente (menú QR) ──
+let menuCarrito = {}; // {id: qty}
+
+function iniciarModoMenu(eventoParam){
+  showView('v-menu');
+  document.getElementById('menu-evento-nombre').textContent = decodeURIComponent(eventoParam).replace(/-/g,' ');
+  renderMenuGrids();
+}
+
+function renderMenuGrids(){
+  const el = document.getElementById('menu-grids');
+  if(!el || !cfg) return;
+  el.innerHTML = cfg.categorias.map(cat => {
+    const prods = cat.productos.filter(p=>!p.oculto && p.precio > 0);
+    if(!prods.length) return '';
+    return `<div class="cat-titulo">${cat.label}</div>
+    <div class="grid">${prods.map(p => {
+      const q = menuCarrito[p.id]||0;
+      return `<div class="prd${q?' incart':''}" onclick="menuToggle('${p.id}')">
+        ${q?`<div class="bdg">${q}</div>`:''}
+        <div class="em">${p.emoji||'🛍️'}</div>
+        <div class="nm">${p.nombre}</div>
+        <div class="pr">${fmt(p.precio)}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }).join('');
+}
+
+function menuToggle(id){
+  menuCarrito[id] = (menuCarrito[id]||0) + 1;
+  if(menuCarrito[id] > 9) menuCarrito[id] = 0;
+  renderMenuGrids();
+  renderMenuResumen();
+}
+
+function renderMenuResumen(){
+  const el = document.getElementById('menu-resumen');
+  const btn = document.getElementById('btn-enviar-pedido');
+  if(!el || !cfg) return;
+  const items = Object.entries(menuCarrito).filter(([,q])=>q>0).map(([id,q])=>{
+    const p = getProd(id);
+    return p ? {id, qty:q, nombre:p.nombre, precio:p.precio, sub:p.precio*q} : null;
+  }).filter(Boolean);
+  const total = items.reduce((a,i)=>a+i.sub,0);
+  if(!items.length){
+    el.innerHTML = '<p style="color:var(--fg2);font-size:.82rem;padding:8px 2px">Aún no elegiste nada 👆</p>';
+    btn.disabled = true;
+    btn.textContent = '✉️ Enviar pedido';
+    return;
+  }
+  el.innerHTML = `<div class="cart-box"><div style="padding:10px 14px">${
+    items.map(i=>`<div class="citem"><span class="ci-nm">${i.qty}× ${i.nombre}</span><span class="ci-sub">${fmt(i.sub)}</span></div>`).join('')
+  }<div class="citem" style="border-top:2px solid var(--bdr);margin-top:4px"><span class="ci-nm" style="font-weight:900">Total</span><span class="ci-sub" style="font-size:1rem">${fmt(total)}</span></div></div></div>`;
+  btn.disabled = false;
+  btn.textContent = `✉️ Enviar pedido · ${fmt(total)}`;
+  btn.onclick = () => sbEnviarPedido(items, total);
+}
+
+async function sbEnviarPedido(items, total){
+  if(!_sb){ alert('Sin conexión con el servidor'); return; }
+  const nombre = document.getElementById('menu-nombre').value.trim() || 'Anónimo';
+  const btn = document.getElementById('btn-enviar-pedido');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando…';
+  const eventoParam = new URLSearchParams(location.search).get('evento') || 'evento';
+  const {error} = await _sb.from('pedidos').insert({
+    evento: eventoParam,
+    nombre_cliente: nombre,
+    items,
+    total,
+    estado: 'pendiente'
+  });
+  if(error){
+    btn.disabled = false;
+    btn.textContent = '✉️ Enviar pedido';
+    alert('Error al enviar: ' + error.message);
+    return;
+  }
+  document.getElementById('menu-form').hidden = true;
+  document.getElementById('menu-estado-ok').hidden = false;
+  document.getElementById('menu-estado-txt').textContent = `Pedido de ${nombre} recibido. ¡Ya lo estamos preparando!`;
+}
+
+function menuReiniciar(){
+  menuCarrito = {};
+  document.getElementById('menu-form').hidden = false;
+  document.getElementById('menu-estado-ok').hidden = true;
+  renderMenuGrids();
+  renderMenuResumen();
+}
+
+// ── Arranque ──
+sbInit();
+
+// Detectar modo=menu en la URL
+(function(){
+  const params = new URLSearchParams(location.search);
+  const modo = params.get('modo');
+  const eventoParam = params.get('evento');
+  if(modo === 'menu' && eventoParam){
+    // Cargar config para tener el menú
+    const saved = (() => { try{ return JSON.parse(localStorage.getItem('caja_cfg')); }catch(e){ return null; } })();
+    if(saved){ cfg = saved; }
+    iniciarModoMenu(eventoParam);
+  }
+})();
 </script>
 </body>
 </html>
