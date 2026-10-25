@@ -1746,7 +1746,7 @@ function dibujarQR(){
   if(!el || typeof QRCode === 'undefined') return;
   el.innerHTML = '';
   try {
-    const eventoSlug = encodeURIComponent((cfg?.nombre||'evento').toLowerCase().replace(/\s+/g,'-'));
+    const eventoSlug = encodeURIComponent(cfg?.nombre||'evento');
     new QRCode(el, {
       text: `https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,
       width: 100, height: 100,
@@ -1880,7 +1880,7 @@ let menuCarrito = {}; // {id: qty}
 
 function iniciarModoMenu(eventoParam){
   showView('v-menu');
-  document.getElementById('menu-evento-nombre').textContent = decodeURIComponent(eventoParam).replace(/-/g,' ');
+  document.getElementById('menu-evento-nombre').textContent = decodeURIComponent(eventoParam);
   renderMenuGrids();
 }
 
