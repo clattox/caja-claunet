@@ -415,6 +415,7 @@ body{
       <input type="number" id="adm-pin" placeholder="1234" maxlength="4" style="max-width:140px">
     </div>
     <h2 style="margin-top:16px">Categorías y productos</h2>
+    <button class="btn-add-cat" id="btn-cargar-evento" style="background:color-mix(in srgb,var(--yel) 15%,var(--sur));border-color:var(--yel);color:var(--fg);margin-bottom:6px">🎵 Cargar productos Escuela de Talentos</button>
     <div id="adm-cats"></div>
     <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
     <button class="btn-save" id="btn-guardar">💾 Guardar y cobrar</button>
@@ -707,6 +708,14 @@ document.getElementById('btn-guardar').onclick = () => {
 };
 
 document.getElementById('btn-admin-cancel').onclick = () => { if(cfg) abrirCaja(); };
+
+document.getElementById('btn-cargar-evento').onclick = () => {
+  if(!confirm('¿Reemplazar la configuración actual con los productos de la Escuela de Talentos?')) return;
+  adminCfg = JSON.parse(JSON.stringify(CFG_DEFAULT));
+  document.getElementById('adm-nombre').value = adminCfg.nombre;
+  document.getElementById('adm-fecha').value  = adminCfg.fecha;
+  renderAdminCats();
+};
 document.getElementById('btn-ir-admin2').onclick    = () => pedirPin();
 
 // ═══════════════════════════════════════
