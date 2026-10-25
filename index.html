@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/otpauth@9.3.6/dist/otpauth.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 <style>
 :root,[data-theme="light"]{--bg:#a8c8e8;--sur:#c8dff2;--fg:#0a1628;--fg2:#3a5070;--acc:#1a6fb5;--yel:#f7a800;--grn:#2a9d5c;--bdr:#90b8d8;--r:14px;--sh:0 2px 10px rgba(0,0,0,.10)}
 [data-theme="dark"]{--bg:#080f1a;--sur:#101e30;--fg:#e0eeff;--fg2:#7aa0c8;--acc:#4a9fd5;--yel:#f7a800;--grn:#48c59b;--bdr:#1a3050;--sh:0 2px 10px rgba(0,0,0,.30)}
@@ -807,7 +809,10 @@ body{
       <h1>⚡ SuperAdmin</h1>
       <p id="sa-subtitle">ClauNet · Gestión de eventos</p>
     </div>
-    <button class="hdr-btn" onclick="showView('v-login')">✕ Salir</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="hdr-btn" onclick="totpSetup()" title="Configurar autenticador 2FA" style="background:rgba(255,255,255,.15);font-size:.75rem;padding:6px 12px">🔐 2FA</button>
+      <button class="hdr-btn" onclick="showView('v-login')">✕ Salir</button>
+    </div>
   </div>
   <div class="content" style="padding-top:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
@@ -1452,7 +1457,11 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
         if(pinBuffer === SA_PIN){
           document.getElementById('pin-overlay').hidden = true;
           _pinDestinoSelector = null;
-          iniciarSuperAdmin();
+          if(_totpSecret){
+            pedirTotp(()=>{ nivelAdmin=2; iniciarSuperAdmin(); });
+          } else {
+            nivelAdmin=2; iniciarSuperAdmin();
+          }
         } else {
           document.getElementById('pin-err').textContent = 'PIN incorrecto';
           pinBuffer = ''; actualizarDots();
@@ -1478,7 +1487,11 @@ document.querySelectorAll('.pin-key[data-k]').forEach(b => b.onclick = () => {
       } else if(pinBuffer === SA_PIN){
         nivelAdmin = 2;
         document.getElementById('pin-overlay').hidden = true;
-        iniciarSuperAdmin();
+        if(_totpSecret){
+          pedirTotp(()=>{ nivelAdmin=2; iniciarSuperAdmin(); });
+        } else {
+          iniciarSuperAdmin();
+        }
       } else if(pinBuffer === getSPin()){
         nivelAdmin = 2;
         document.getElementById('pin-overlay').hidden = true;
@@ -2159,6 +2172,7 @@ let _pedidos = []; // cache local
 function sbInit(){
   if(!window.supabase) return;
   _sb = window.supabase.createClient(SB_URL, SB_KEY);
+  totpCargarSecret();
 }
 
 // ── Suscripción realtime (caja) ──
@@ -2644,6 +2658,101 @@ sbInit();
 // ══════════════════════════════════════════════
 
 const SA_PIN = '7731'; // PIN maestro superadmin (solo Claudio)
+
+// ── TOTP 2FA ─────────────────────────────────────────────────────────────────
+let _totpSecret = null; // cargado desde Supabase sa_config
+
+async function totpCargarSecret(){
+  if(!_sb) return;
+  const {data} = await _sb.from('sa_config').select('value').eq('key','totp_secret').single();
+  if(data?.value) _totpSecret = data.value;
+}
+
+function totpVerificar(code){
+  if(!_totpSecret) return false;
+  try {
+    const totp = new OTPAuth.TOTP({ secret: OTPAuth.Secret.fromBase32(_totpSecret), digits:6, period:30 });
+    return totp.validate({ token: code.trim(), window: 1 }) !== null;
+  } catch(e){ return false; }
+}
+
+// Genera un secret nuevo, lo guarda en Supabase y muestra QR de setup
+async function totpSetup(){
+  const secret = new OTPAuth.Secret({ size: 20 });
+  const totp = new OTPAuth.TOTP({ issuer:'ClauNet Caja', label:'SuperAdmin', secret, digits:6, period:30 });
+  const uri = totp.toString();
+  const b32 = secret.base32;
+  // Guardar en Supabase
+  if(_sb){
+    await _sb.from('sa_config').upsert({ key:'totp_secret', value:b32 }, { onConflict:'key' });
+    _totpSecret = b32;
+  }
+  // Mostrar QR
+  _mostrarTotpQR(uri, b32);
+}
+
+function _mostrarTotpQR(uri, b32){
+  let ov = document.getElementById('totp-setup-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id='totp-setup-overlay'; document.body.appendChild(ov); }
+  ov.style.cssText='position:fixed;inset:0;background:rgba(10,22,40,.85);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(6px)';
+  ov.innerHTML=`<div style="background:#1a2744;border-radius:24px;padding:28px 24px;width:min(92vw,360px);text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+    <div style="font-size:2rem;margin-bottom:4px">🔐</div>
+    <div style="font-family:Nunito,sans-serif;font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:4px">Configurar Autenticador</div>
+    <div style="font-family:Nunito,sans-serif;font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:16px">Escanea con Google Authenticator o Authy</div>
+    <canvas id="totp-qr-canvas" style="border-radius:12px;background:#fff;padding:10px;width:180px;height:180px"></canvas>
+    <div style="font-family:monospace;font-size:.72rem;color:rgba(255,255,255,.45);margin:12px 0 4px;word-break:break-all;padding:0 8px">${b32}</div>
+    <div style="font-family:Nunito,sans-serif;font-size:.75rem;color:rgba(255,255,255,.5);margin-bottom:18px">Copia el código si no puedes escanear el QR</div>
+    <button onclick="document.getElementById('totp-setup-overlay').style.display='none'"
+      style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#1a6fb5,#0d4a8a);color:#fff;font-family:Nunito,sans-serif;font-size:.95rem;font-weight:900;cursor:pointer">
+      ✅ Listo, ya lo escaneé
+    </button>
+  </div>`;
+  // Generar QR en canvas
+  setTimeout(()=>{
+    const canvas = document.getElementById('totp-qr-canvas');
+    if(canvas && window.QRCode) QRCode.toCanvas(canvas, uri, {width:180,margin:1}, ()=>{});
+  }, 50);
+}
+
+// Mostrar overlay de ingreso de código TOTP (después del PIN correcto)
+let _totpCallback = null;
+function pedirTotp(onSuccess){
+  _totpCallback = onSuccess;
+  let ov = document.getElementById('totp-overlay');
+  if(!ov){ ov = document.createElement('div'); ov.id='totp-overlay'; document.body.appendChild(ov); }
+  ov.style.cssText='position:fixed;inset:0;background:rgba(10,22,40,.85);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(6px)';
+  ov.innerHTML=`<div style="background:#1a2744;border-radius:24px;padding:28px 24px;width:min(92vw,340px);text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.5)">
+    <div style="font-size:2rem;margin-bottom:4px">📱</div>
+    <div style="font-family:Nunito,sans-serif;font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:4px">Verificación en dos pasos</div>
+    <div style="font-family:Nunito,sans-serif;font-size:.82rem;color:rgba(255,255,255,.6);margin-bottom:20px">Ingresa el código de 6 dígitos de tu app</div>
+    <input id="totp-input" type="tel" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code"
+      style="width:100%;box-sizing:border-box;padding:16px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;font-size:1.8rem;font-family:monospace;text-align:center;letter-spacing:.3em;outline:none;margin-bottom:8px">
+    <div id="totp-err" style="font-family:Nunito,sans-serif;font-size:.8rem;color:#f87171;min-height:20px;margin-bottom:12px"></div>
+    <button onclick="_totpConfirmar()"
+      style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#1a6fb5,#0d4a8a);color:#fff;font-family:Nunito,sans-serif;font-size:.95rem;font-weight:900;cursor:pointer;margin-bottom:10px">
+      ✅ Verificar
+    </button>
+    <button onclick="document.getElementById('totp-overlay').style.display='none'"
+      style="background:none;border:none;color:rgba(255,255,255,.4);font-size:.8rem;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">← Cancelar</button>
+  </div>`;
+  const inp = document.getElementById('totp-input');
+  setTimeout(()=>inp && inp.focus(), 100);
+  inp.onkeydown = e => { if(e.key==='Enter') _totpConfirmar(); };
+  inp.oninput = () => { if(inp.value.length===6) _totpConfirmar(); };
+}
+
+function _totpConfirmar(){
+  const code = document.getElementById('totp-input')?.value || '';
+  if(totpVerificar(code)){
+    document.getElementById('totp-overlay').style.display='none';
+    if(_totpCallback){ const cb=_totpCallback; _totpCallback=null; cb(); }
+  } else {
+    document.getElementById('totp-err').textContent='Código incorrecto. Intenta de nuevo.';
+    document.getElementById('totp-input').value='';
+    document.getElementById('totp-input').focus();
+  }
+}
+
 let _saEventos = [];
 let _saEditId  = null; // null = nuevo, uuid = editar
 let _saCats    = [];   // categorías del evento en edición
