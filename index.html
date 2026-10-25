@@ -1038,8 +1038,7 @@ const CFG_DEFAULT = {
   fecha: new Date().toISOString().slice(0,10),
   categorias: [
     {
-      id: 'bebestibles',
-      label: '🥤 Bebestibles',
+      id: 'bebestibles', nombre: '🥤 Bebestibles', label: '🥤 Bebestibles', cocina: false,
       productos: [
         {id:'beb01', emoji:'🥫', nombre:'Bebida lata',    precio:1500},
         {id:'beb02', emoji:'🧃', nombre:'Jugo',           precio:500},
@@ -1049,8 +1048,7 @@ const CFG_DEFAULT = {
       ]
     },
     {
-      id: 'comida',
-      label: '🍔 Comida',
+      id: 'comida', nombre: '🍔 Comida', label: '🍔 Comida', cocina: true,
       productos: [
         {id:'com01', emoji:'🍟', nombre:'Papas Fritas',   precio:1500},
         {id:'com02', emoji:'🌭', nombre:'Completo',       precio:2500},
@@ -1061,7 +1059,7 @@ const CFG_DEFAULT = {
     },
     {
       id: 'otros',
-      label: '🎟️ Otros',
+      id: 'otros', nombre: '🎟️ Otros', label: '🎟️ Otros', cocina: false,
       productos: [
         {id:'ot01', emoji:'🎫', nombre:'Entrada',         precio:3000},
         {id:'ot02', emoji:'🎁', nombre:'Rifa',            precio:1000},
@@ -1473,7 +1471,7 @@ function renderGrids(){
   cfg.categorias.forEach(cat=>{
     const titulo = document.createElement('div');
     titulo.className = 'cat-titulo';
-    titulo.textContent = cat.label;
+    titulo.textContent = cat.label || cat.nombre;
     cont.appendChild(titulo);
     const grid = document.createElement('div'); grid.className='grid';
     cat.productos.forEach(p=>{
@@ -2177,7 +2175,7 @@ function renderMenuGrids(){
   el.innerHTML = cfg.categorias.map(cat => {
     const prods = cat.productos.filter(p=>!p.oculto && p.precio > 0);
     if(!prods.length) return '';
-    return `<div class="cat-titulo">${cat.label}</div>
+    return `<div class="cat-titulo">${cat.label||cat.nombre}</div>
     <div class="grid">${prods.map(p => {
       const q = menuCarrito[p.id]||0;
       return `<div class="prd${q?' incart':''}" onclick="menuToggle('${p.id}')">
