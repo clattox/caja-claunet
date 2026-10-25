@@ -2249,10 +2249,19 @@ let _cocinaChannel = null;
 let _cocinaEvento  = '';
 let _cocina_listos = new Set(); // ids marcados listos localmente
 
-function iniciarModoCocina(eventoParam){
-  _cocinaEvento = decodeURIComponent(eventoParam);
-  showView('v-cocina');
+async function iniciarModoCocina(eventoParam){
   if(!_sb){ sbInit(); }
+  // Resolver slug → nombre del evento (los pedidos se guardan con el nombre)
+  const slug = decodeURIComponent(eventoParam);
+  const {data: evData} = await _sb.from('eventos').select('nombre').eq('slug', slug).single();
+  _cocinaEvento = evData ? evData.nombre : slug;
+
+  // Actualizar título en el header de cocina si existe
+  const connEl = document.getElementById('cocina-conn');
+  const tituloEl = document.getElementById('cocina-titulo');
+  if(tituloEl) tituloEl.textContent = _cocinaEvento;
+
+  showView('v-cocina');
   // Realtime
   if(_cocinaChannel) _sb && _sb.removeChannel(_cocinaChannel);
   _cocinaChannel = _sb.channel('cocina-'+Date.now())
@@ -2360,7 +2369,7 @@ sbInit();
     }
     iniciarModoMenu(slug);
   } else if(modo === 'cocina' && eventoParam){
-    iniciarModoCocina(eventoParam);
+    await iniciarModoCocina(eventoParam);
   }
 })();
 
