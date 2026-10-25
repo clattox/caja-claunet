@@ -445,6 +445,24 @@ button:active:not(:disabled){transform:scale(.98)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 
+/* ══ VISTA COCINA ══ */
+#v-cocina{background:var(--bg)}
+.cocina-hdr{background:#1a3a1a;color:#fff;padding:14px 16px;text-align:center;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between}
+.cocina-conn{font-size:.72rem;opacity:.8}
+.cocina-lista{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.cocina-card{background:var(--sur);border:2px solid var(--grn);border-radius:14px;padding:14px;position:relative}
+.cocina-card.listo{opacity:.45;border-color:var(--bdr)}
+.cocina-card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cocina-mesa{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--fg)}
+.cocina-hora{font-size:.72rem;color:var(--fg2)}
+.cocina-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:.92rem}
+.cocina-item:last-child{border-bottom:none}
+.cocina-item-qty{background:var(--grn);color:#fff;border-radius:6px;padding:2px 8px;font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:900;flex-shrink:0}
+.cocina-item-nm{font-family:'Nunito',sans-serif;font-weight:800;color:var(--fg);flex:1}
+.btn-cocina-listo{width:100%;margin-top:12px;padding:12px;border:none;border-radius:10px;background:var(--grn);color:#fff;font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:900;cursor:pointer}
+.cocina-card.listo .btn-cocina-listo{background:var(--bdr);color:var(--fg2)}
+.cocina-vacio{text-align:center;padding:60px 20px;color:var(--fg2);font-size:.95rem;font-weight:700}
+
 /* ══ VISTA CLIENTE (menú QR) ══ */
 #v-menu .menu-hdr{background:linear-gradient(90deg,#1a6fb5,#0d4a8a);color:#fff;padding:16px;text-align:center}
 #v-menu .menu-hdr h1{font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:900}
@@ -586,6 +604,18 @@ body{
   </div>
 </div>
 
+<!-- ══ VISTA COCINA ══ -->
+<div class="view" id="v-cocina">
+  <div class="cocina-hdr">
+    <span>🍳 Cocina</span>
+    <span class="cocina-conn" id="cocina-conn">⚪ Conectando…</span>
+    <button onclick="cocinaActualizar()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer">🔄</button>
+  </div>
+  <div class="cocina-lista" id="cocina-lista">
+    <div class="cocina-vacio">Esperando comandas… 🍽️</div>
+  </div>
+</div>
+
 <!-- VISTA BINGO -->
 <div class="view" id="v-bingo">
   <div class="hdr" style="background:linear-gradient(90deg,#1a6fb5 0%,#0d4a8a 100%)">
@@ -703,10 +733,16 @@ body{
     <button class="btn-add-cat" id="btn-add-cat">＋ Agregar categoría</button>
     <button class="btn-save" id="btn-guardar">💾 Guardar y cobrar</button>
     <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--bdr)">
-      <div style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);margin-bottom:8px">🔗 Link de la caja</div>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <code style="background:var(--bg);border:1px solid var(--bdr);border-radius:8px;padding:6px 10px;font-size:.82rem;color:var(--fg)">caja.claunet.cl</code>
-        <div id="adm-qr" style="width:100px;height:100px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+      <div style="font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:800;color:var(--fg2);margin-bottom:8px">🔗 Links del evento</div>
+      <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:.72rem;color:var(--fg2);font-weight:700;margin-bottom:4px">📱 Clientes (QR)</div>
+          <div id="adm-qr" style="width:100px;height:100px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+        </div>
+        <div>
+          <div style="font-size:.72rem;color:var(--fg2);font-weight:700;margin-bottom:4px">🍳 Cocina</div>
+          <div id="adm-qr-cocina" style="width:100px;height:100px;border-radius:8px;border:1px solid var(--bdr);overflow:hidden;background:#fff"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -992,6 +1028,10 @@ function renderAdminCats(){
         <label>Nombre (con emoji)</label>
         <input type="text" class="cat-nombre" data-ci="${ci}" value="${cat.label||''}" placeholder="🍔 Comida">
       </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;color:var(--fg2);margin-bottom:10px;cursor:pointer">
+        <input type="checkbox" class="cat-cocina" data-ci="${ci}" ${cat.cocina?'checked':''} style="width:16px;height:16px;accent-color:var(--grn)">
+        🍳 Va a cocina
+      </label>
       <div id="prods-${ci}"></div>
       <button class="btn-add" data-ci="${ci}">＋ Agregar producto</button>`;
     cont.appendChild(card);
@@ -1004,10 +1044,11 @@ function renderAdminCats(){
     renderAdminCats();
   });
   cont.querySelectorAll('.cat-nombre').forEach(inp => {
-    // sync on every keystroke
     inp.oninput = () => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; };
-    // also sync on blur in case oninput was missed
     inp.onblur  = () => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; };
+  });
+  cont.querySelectorAll('.cat-cocina').forEach(chk => {
+    chk.onchange = () => { adminCfg.categorias[+chk.dataset.ci].cocina = chk.checked; };
   });
   cont.querySelectorAll('.btn-add').forEach(b => b.onclick = () => {
     // snapshot current labels before re-render
@@ -1075,8 +1116,9 @@ function accionGuardar(){
     const bpinVal = document.getElementById('adm-bpin').value.trim();
     if(bpinVal && /^\d{4}$/.test(bpinVal)) localStorage.setItem(LS_BINGO_PIN, bpinVal);
   }
-  // Snapshot labels from DOM antes de filtrar
+  // Snapshot labels y flags de cocina desde DOM antes de filtrar
   document.querySelectorAll('.cat-nombre').forEach(inp => { adminCfg.categorias[+inp.dataset.ci].label = inp.value; });
+  document.querySelectorAll('.cat-cocina').forEach(chk => { adminCfg.categorias[+chk.dataset.ci].cocina = chk.checked; });
   adminCfg.nombre = nombre;
   adminCfg.fecha  = fecha;
   adminCfg.categorias = adminCfg.categorias
@@ -1748,17 +1790,23 @@ function abrirEmojiPicker(inp, p){
 
 function dibujarQR(){
   const el = document.getElementById('adm-qr');
-  if(!el || typeof QRCode === 'undefined') return;
-  el.innerHTML = '';
-  try {
-    const eventoSlug = encodeURIComponent(cfg?.nombre||'evento');
+  const elC = document.getElementById('adm-qr-cocina');
+  if(typeof QRCode === 'undefined') return;
+  const eventoSlug = encodeURIComponent(cfg?.nombre||'evento');
+  if(el){ el.innerHTML = ''; try{
     new QRCode(el, {
       text: `https://caja.claunet.cl?evento=${eventoSlug}&modo=menu`,
-      width: 100, height: 100,
-      colorDark: '#0a1628', colorLight: '#ffffff',
+      width: 100, height: 100, colorDark: '#0a1628', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
-  } catch(e){}
+  } catch(e){} }
+  if(elC){ elC.innerHTML = ''; try{
+    new QRCode(elC, {
+      text: `https://caja.claunet.cl?evento=${eventoSlug}&modo=cocina`,
+      width: 100, height: 100, colorDark: '#1a3a1a', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } catch(e){} }
 }
 
 // ═══════════════════════════════════════
@@ -1926,7 +1974,9 @@ function renderMenuResumen(){
   if(!el || !cfg) return;
   const items = Object.entries(menuCarrito).filter(([,q])=>q>0).map(([id,q])=>{
     const p = getProd(id);
-    return p ? {id, qty:q, nombre:p.nombre, precio:p.precio, sub:p.precio*q} : null;
+    if(!p) return null;
+    const cat = cfg.categorias.find(c=>c.productos.some(x=>x.id===id));
+    return {id, qty:q, nombre:p.nombre, precio:p.precio, sub:p.precio*q, cocina:!!(cat&&cat.cocina)};
   }).filter(Boolean);
   const total = items.reduce((a,i)=>a+i.sub,0);
   if(!items.length){
@@ -1976,6 +2026,83 @@ function menuReiniciar(){
   renderMenuResumen();
 }
 
+// ══ VISTA COCINA ══
+let _cocinaChannel = null;
+let _cocinaEvento  = '';
+let _cocina_listos = new Set(); // ids marcados listos localmente
+
+function iniciarModoCocina(eventoParam){
+  _cocinaEvento = decodeURIComponent(eventoParam);
+  showView('v-cocina');
+  if(!_sb){ sbInit(); }
+  // Realtime
+  if(_cocinaChannel) _sb && _sb.removeChannel(_cocinaChannel);
+  _cocinaChannel = _sb.channel('cocina-'+Date.now())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},
+      payload => {
+        if(payload.new.evento !== _cocinaEvento) return;
+        const tieneComida = (payload.new.items||[]).some(i=>i.cocina);
+        if(!tieneComida) return;
+        cocinaRender([payload.new, ...(_cocina_pedidos||[])]);
+        try{ navigator.vibrate && navigator.vibrate([300,100,300]); }catch(e){}
+      })
+    .subscribe(status => {
+      const el = document.getElementById('cocina-conn');
+      if(el) el.textContent = status==='SUBSCRIBED' ? '🟢 En línea' : '🔴 Sin conexión';
+    });
+  cocinaActualizar();
+}
+
+let _cocina_pedidos = [];
+async function cocinaActualizar(){
+  if(!_sb || !_cocinaEvento) return;
+  const {data} = await _sb.from('pedidos').select('*')
+    .eq('evento',_cocinaEvento).eq('estado','pendiente')
+    .order('created_at',{ascending:true});
+  if(data){
+    _cocina_pedidos = data.filter(p=>(p.items||[]).some(i=>i.cocina));
+    cocinaRender(_cocina_pedidos);
+  }
+}
+
+function cocinaRender(pedidos){
+  const el = document.getElementById('cocina-lista');
+  if(!el) return;
+  if(!pedidos.length){ el.innerHTML='<div class="cocina-vacio">Sin comandas pendientes ✅</div>'; return; }
+  el.innerHTML = pedidos.map(p => {
+    const hora = new Date(p.created_at).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    const listo = _cocina_listos.has(p.id);
+    const itemsComida = (p.items||[]).filter(i=>i.cocina);
+    const itemsHtml = itemsComida.map(i=>`
+      <div class="cocina-item">
+        <span class="cocina-item-qty">${i.qty}×</span>
+        <span class="cocina-item-nm">${i.nombre}</span>
+      </div>`).join('');
+    return `<div class="cocina-card ${listo?'listo':''}" id="cc-${p.id}">
+      <div class="cocina-card-hdr">
+        <span class="cocina-mesa">👤 ${p.nombre_cliente||'Mesa'}${p.mesa?' · Mesa '+p.mesa:''}</span>
+        <span class="cocina-hora">${hora}</span>
+      </div>
+      ${itemsHtml}
+      <button class="btn-cocina-listo" onclick="cocinaListo('${p.id}')" ${listo?'disabled':''}>
+        ${listo?'✅ Entregado':'✅ Marcar como listo'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function cocinaListo(id){
+  _cocina_listos.add(id);
+  // Actualizar UI inmediatamente
+  const card = document.getElementById('cc-'+id);
+  if(card){ card.classList.add('listo'); card.querySelector('.btn-cocina-listo').disabled=true; card.querySelector('.btn-cocina-listo').textContent='✅ Entregado'; }
+  // Marcar en Supabase como confirmado
+  _sb && _sb.from('pedidos').update({estado:'confirmado'}).eq('id',id).then(()=>{
+    _cocina_pedidos = _cocina_pedidos.filter(p=>p.id!==id);
+    setTimeout(()=>{ const c=document.getElementById('cc-'+id); if(c) c.style.display='none'; }, 2000);
+  });
+}
+
 // ── Arranque ──
 sbInit();
 
@@ -1985,10 +2112,11 @@ sbInit();
   const modo = params.get('modo');
   const eventoParam = params.get('evento');
   if(modo === 'menu' && eventoParam){
-    // Cargar config para tener el menú
     const saved = (() => { try{ return JSON.parse(localStorage.getItem('caja_cfg')); }catch(e){ return null; } })();
     if(saved){ cfg = saved; }
     iniciarModoMenu(eventoParam);
+  } else if(modo === 'cocina' && eventoParam){
+    iniciarModoCocina(eventoParam);
   }
 })();
 </script>
