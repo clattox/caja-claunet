@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Caja · ClauNet</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
@@ -555,6 +556,11 @@ button:active:not(:disabled){transform:scale(.98)}
 .menu-prd:active .m-add{transform:scale(.88)}
 .menu-prd.incart .m-add{background:var(--mn-primary-h)}
 .menu-prd .m-bdg{position:absolute;top:-8px;right:-8px;background:var(--mn-primary);color:#fff;font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:900;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(30,107,184,.3);pointer-events:none}
+.m-qty-ctrl{display:flex;align-items:center;gap:6px;margin-top:4px}
+.m-btn-minus,.m-btn-plus{width:28px;height:28px;border-radius:50%;border:none;font-size:1.1rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0}
+.m-btn-minus{background:#fee2e2;color:#dc2626}
+.m-btn-plus{background:var(--mn-primary);color:#fff}
+.m-qty-num{font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;color:var(--mn-text);min-width:18px;text-align:center}
 .menu-resumen-box{background:var(--mn-card);border-radius:var(--r-card);border:1.5px solid var(--mn-border);overflow:hidden;margin:0 18px 4px;box-shadow:var(--sh-card)}
 .menu-resumen-hdr{padding:10px 14px;background:var(--mn-muted);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:800;color:var(--mn-text2);border-bottom:1px solid var(--mn-border);display:flex;align-items:center;gap:6px}
 .menu-resumen-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--mn-border)}
@@ -2337,20 +2343,36 @@ function renderMenuGrids(){
     return `<div class="menu-cat-titulo">${cat.emoji||''} ${cat.label||cat.nombre}</div>
     <div class="menu-grid">${prods.map(p => {
       const q = menuCarrito[p.id]||0;
-      return `<div class="menu-prd${q?' incart':''}" onclick="menuToggle('${p.id}')">
-        ${q?`<div class="m-bdg">${q}</div>`:''}
-        <div class="m-em">${p.emoji||'🛍️'}</div>
-        <div class="m-nm">${p.nombre}</div>
-        <div class="m-pr">${fmt(p.precio)}</div>
-        <div class="m-add">+</div>
-      </div>`;
+      return q
+        ? `<div class="menu-prd incart" style="cursor:default">
+            <div class="m-em">${p.emoji||'🛍️'}</div>
+            <div class="m-nm">${p.nombre}</div>
+            <div class="m-pr">${fmt(p.precio)}</div>
+            <div class="m-qty-ctrl">
+              <button class="m-btn-minus" onclick="event.stopPropagation();menuQuitar('${p.id}')">−</button>
+              <span class="m-qty-num">${q}</span>
+              <button class="m-btn-plus" onclick="event.stopPropagation();menuToggle('${p.id}')">+</button>
+            </div>
+          </div>`
+        : `<div class="menu-prd" onclick="menuToggle('${p.id}')">
+            <div class="m-em">${p.emoji||'🛍️'}</div>
+            <div class="m-nm">${p.nombre}</div>
+            <div class="m-pr">${fmt(p.precio)}</div>
+            <div class="m-add">+</div>
+          </div>`;
     }).join('')}</div>`;
   }).join('');
 }
 
 function menuToggle(id){
   menuCarrito[id] = (menuCarrito[id]||0) + 1;
-  if(menuCarrito[id] > 9) menuCarrito[id] = 0;
+  if(menuCarrito[id] > 9) menuCarrito[id] = 9;
+  renderMenuGrids();
+  renderMenuResumen();
+}
+function menuQuitar(id){
+  menuCarrito[id] = (menuCarrito[id]||1) - 1;
+  if(menuCarrito[id] <= 0) delete menuCarrito[id];
   renderMenuGrids();
   renderMenuResumen();
 }
